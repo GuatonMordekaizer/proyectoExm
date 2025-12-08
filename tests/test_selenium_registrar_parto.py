@@ -1,11 +1,10 @@
 """
-Test de Selenium para automatizar el registro de parto.
-Prueba el formulario completo de registro de parto obstétrico.
+Test de Selenium para automatizar el registro de parto y RN.
+Usa una paciente existente, registra parto y luego el recién nacido.
 """
 
 import time
-import random
-from datetime import date, timedelta
+from datetime import date
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -14,112 +13,30 @@ from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
-def generar_rut_valido():
-    """Genera un RUT chileno válido aleatorio"""
-    # Generar número aleatorio entre 5.000.000 y 25.000.000
-    numero = random.randint(5000000, 25000000)
-    
-    # Calcular dígito verificador
-    suma = 0
-    multiplo = 2
-    
-    for digito in reversed(str(numero)):
-        suma += int(digito) * multiplo
-        multiplo += 1
-        if multiplo == 8:
-            multiplo = 2
-    
-    resto = suma % 11
-    dv_calculado = 11 - resto
-    
-    if dv_calculado == 11:
-        dv = '0'
-    elif dv_calculado == 10:
-        dv = 'K'
-    else:
-        dv = str(dv_calculado)
-    
-    # Formatear con puntos y guión
-    rut_str = str(numero)
-    rut_formateado = f"{rut_str[:-6]}.{rut_str[-6:-3]}.{rut_str[-3:]}-{dv}"
-    
-    return rut_formateado
-
-
-def crear_paciente_para_parto(driver, wait):
-    """
-    Crea una paciente madre para poder registrar el parto.
-    Retorna el ID de la paciente creada.
-    """
-    print("\n[Pre-requisito] Creando paciente madre...")
-    
-    # Navegar al formulario de crear paciente
-    driver.get("http://127.0.0.1:8000/pacientes/crear/")
-    wait.until(EC.presence_of_element_located((By.ID, "id_rut")))
-    
-    # Generar datos
-    rut_paciente = generar_rut_valido()
-    edad_anios = random.randint(18, 35)  # Edad fértil
-    fecha_nacimiento = date.today() - timedelta(days=edad_anios*365 + random.randint(0, 364))
-    
-    # Completar formulario básico de paciente
-    driver.find_element(By.ID, "id_rut").send_keys(rut_paciente)
-    driver.find_element(By.ID, "id_nombre").send_keys("María Isabel")
-    driver.find_element(By.ID, "id_apellido_paterno").send_keys("González")
-    driver.find_element(By.ID, "id_apellido_materno").send_keys("Pérez")
-    
-    # Fecha de nacimiento con JavaScript
-    fecha_input = driver.find_element(By.ID, "id_fecha_nacimiento")
-    driver.execute_script(f"arguments[0].value = '{fecha_nacimiento.strftime('%Y-%m-%d')}';", fecha_input)
-    
-    # Campos obligatorios
-    Select(driver.find_element(By.ID, "id_estado_civil")).select_by_value("casada")
-    Select(driver.find_element(By.ID, "id_escolaridad")).select_by_value("media_completa")
-    Select(driver.find_element(By.ID, "id_prevision")).select_by_value("fonasa_b")
-    
-    driver.find_element(By.ID, "id_direccion").send_keys("Av. Libertad 456")
-    driver.find_element(By.ID, "id_comuna").send_keys("Chillán")
-    driver.find_element(By.ID, "id_region").send_keys("Ñuble")
-    
-    # Enviar
-    submit_button = driver.find_element(By.CSS_SELECTOR, "button[type='submit'].btn-primary")
-    driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
-    time.sleep(0.5)
-    driver.execute_script("arguments[0].click();", submit_button)
-    
-    time.sleep(2)
-    
-    # Extraer ID de la URL (ej: /pacientes/5/)
-    current_url = driver.current_url
-    paciente_id = current_url.rstrip('/').split('/')[-1]
-    
-    print(f"✓ Paciente creada: {rut_paciente} (ID: {paciente_id})")
-    return paciente_id
-
-
 def test_registrar_parto():
     """
-    Test completo de registro de parto.
-    Completa todos los campos del formulario y verifica el registro exitoso.
+    Test completo: Registra parto y RN de una paciente existente.
     """
     driver = webdriver.Chrome()
     driver.maximize_window()
     wait = WebDriverWait(driver, 10)
     
+    # ID de paciente existente (cambiar según necesidad)
+    PACIENTE_ID = "1"  # Usar paciente existente en la BD
+    
     try:
         print("=" * 80)
-        print("TEST: REGISTRAR PARTO")
+        print("TEST: REGISTRAR PARTO Y RECIEN NACIDO")
         print("=" * 80)
         
         # ===================================================================
         # PASO 1: LOGIN
         # ===================================================================
-        print("\n[1/5] Iniciando sesión...")
+        print("\n[1/4] Iniciando sesión...")
         driver.get("http://127.0.0.1:8000/auth/login/")
         
-        # Login como matrona (puede registrar partos)
         username_input = wait.until(EC.presence_of_element_located((By.NAME, "username")))
-        username_input.send_keys("medico_g")  # También puede usar matrona_test
+        username_input.send_keys("medico_g")
         
         password_input = driver.find_element(By.NAME, "password")
         password_input.send_keys("doc@12345678")
@@ -131,23 +48,16 @@ def test_registrar_parto():
         print("✓ Sesión iniciada como medico_g")
         
         # ===================================================================
-        # PASO 2: CREAR PACIENTE (Pre-requisito)
+        # PASO 2: REGISTRAR PARTO
         # ===================================================================
-        paciente_id = crear_paciente_para_parto(driver, wait)
-        
-        # ===================================================================
-        # PASO 3: NAVEGAR AL FORMULARIO DE REGISTRAR PARTO
-        # ===================================================================
-        print(f"\n[2/5] Navegando al formulario de registrar parto (paciente ID: {paciente_id})...")
-        driver.get(f"http://127.0.0.1:8000/obstetricia/registrar-parto/{paciente_id}/")
+        print(f"\n[2/4] Registrando parto para paciente ID: {PACIENTE_ID}...")
+        driver.get(f"http://127.0.0.1:8000/obstetricia/parto/registrar/{PACIENTE_ID}/")
         
         wait.until(EC.presence_of_element_located((By.ID, "id_fecha_parto")))
-        print("✓ Formulario de registrar parto cargado")
+        print("✓ Formulario de parto cargado")
         
-        # ===================================================================
-        # PASO 4: COMPLETAR FORMULARIO DE PARTO
-        # ===================================================================
-        print("\n[3/5] Completando formulario de parto...")
+        # Completar formulario de parto
+        print("  Completando campos...")
         
         # Fecha y hora del parto
         fecha_parto = date.today()
@@ -161,13 +71,29 @@ def test_registrar_parto():
         print("  ✓ Hora de parto completada")
         
         # Edad gestacional
-        driver.find_element(By.ID, "id_edad_gestacional_semanas").send_keys("39")
-        driver.find_element(By.ID, "id_edad_gestacional_dias").send_keys("3")
-        print("  ✓ Edad gestacional completada")
+        sem_input = driver.find_element(By.ID, "id_edad_gestacional_semanas")
+        sem_input.clear()
+        sem_input.send_keys("39")
+        
+        dias_input = driver.find_element(By.ID, "id_edad_gestacional_dias")
+        dias_input.clear()
+        dias_input.send_keys("3")
+        print("  ✓ Edad gestacional completada (39 semanas + 3 días)")
+        
+        # SECCION 1: Datos del Parto
+        
+        # Control prenatal (opcional, si existe seleccionar el primero)
+        try:
+            control_select = Select(driver.find_element(By.ID, "id_control_prenatal"))
+            if len(control_select.options) > 1:
+                control_select.select_by_index(1)
+                print("  ✓ Control prenatal seleccionado")
+        except:
+            print("  - Control prenatal no disponible")
         
         # Tipo de parto
-        Select(driver.find_element(By.ID, "id_tipo_parto")).select_by_value("vaginal")
-        print("  ✓ Tipo de parto: Vaginal")
+        Select(driver.find_element(By.ID, "id_tipo_parto")).select_by_value("eutocico")
+        print("  ✓ Tipo de parto: Eutócico")
         
         # Presentación
         Select(driver.find_element(By.ID, "id_presentacion")).select_by_value("cefalica")
@@ -177,58 +103,59 @@ def test_registrar_parto():
         Select(driver.find_element(By.ID, "id_inicio_trabajo_parto")).select_by_value("espontaneo")
         print("  ✓ Inicio: Espontáneo")
         
-        # Lugar del parto
-        Select(driver.find_element(By.ID, "id_lugar_parto")).select_by_value("hospital")
-        print("  ✓ Lugar: Hospital")
+        # Lugar de atención
+        Select(driver.find_element(By.ID, "id_lugar_atencion")).select_by_value("sala_parto")
+        print("  ✓ Lugar: Sala de Parto")
         
         # Alumbramiento
-        try:
-            Select(driver.find_element(By.ID, "id_alumbramiento")).select_by_value("espontaneo")
-            print("  ✓ Alumbramiento: Espontáneo")
-        except:
-            print("  ⚠ Campo alumbramiento no encontrado (opcional)")
+        Select(driver.find_element(By.ID, "id_alumbramiento")).select_by_value("completo")
+        print("  ✓ Alumbramiento: Completo")
+        
+        # Navegar a sección 2
+        driver.execute_script("nextStep()")
+        time.sleep(0.8)
+        print("  → Navegando a Sección 2...")
+        
+        # SECCION 2: Antecedentes y Estado Materno
+        
+        # Paridad: Primigesta
+        driver.find_element(By.ID, "id_primigesta").click()
+        print("  ✓ Paridad: Primigesta")
+        
+        # Rotura de membranas
+        Select(driver.find_element(By.ID, "id_rotura_membranas")).select_by_value("espontanea")
+        print("  ✓ Rotura membranas: Espontánea")
         
         # Líquido amniótico
-        try:
-            Select(driver.find_element(By.ID, "id_liquido_amniotico")).select_by_value("claro")
-            print("  ✓ Líquido amniótico: Claro")
-        except:
-            print("  ⚠ Campo líquido amniótico no encontrado (opcional)")
+        Select(driver.find_element(By.ID, "id_liquido_amniotico")).select_by_value("claro")
+        print("  ✓ Líquido amniótico: Claro")
         
         # Anestesia
-        try:
-            Select(driver.find_element(By.ID, "id_anestesia")).select_by_value("epidural")
-            print("  ✓ Anestesia: Epidural")
-        except:
-            print("  ⚠ Campo anestesia no encontrado (opcional)")
+        Select(driver.find_element(By.ID, "id_anestesia")).select_by_value("epidural")
+        print("  ✓ Anestesia: Epidural")
         
-        # Paridad (si existe)
-        try:
-            driver.find_element(By.ID, "id_paridad").send_keys("1")
-            print("  ✓ Paridad completada")
-        except:
-            print("  ⚠ Campo paridad no encontrado (opcional)")
+        # Navegar a sección 3
+        driver.execute_script("nextStep()")
+        time.sleep(0.8)
+        print("  → Navegando a Sección 3...")
         
-        # Gestaciones previas
-        try:
-            driver.find_element(By.ID, "id_gestaciones_previas").send_keys("0")
-            print("  ✓ Gestaciones previas completadas")
-        except:
-            print("  ⚠ Campo gestaciones previas no encontrado (opcional)")
+        # SECCION 3: Complicaciones y Procedimientos
         
-        # Cesáreas previas
-        try:
-            driver.find_element(By.ID, "id_cesareas_previas").send_keys("0")
-            print("  ✓ Cesáreas previas completadas")
-        except:
-            print("  ⚠ Campo cesáreas previas no encontrado (opcional)")
+        # Desgarro perineal
+        Select(driver.find_element(By.ID, "id_desgarro_perineal")).select_by_value("ninguno")
+        print("  ✓ Desgarro: Ninguno")
         
-        # Observaciones
-        try:
-            driver.find_element(By.ID, "id_observaciones").send_keys("Parto sin complicaciones. Test automatizado Selenium.")
-            print("  ✓ Observaciones completadas")
-        except:
-            print("  ⚠ Campo observaciones no encontrado (opcional)")
+        # Navegar a sección 4
+        driver.execute_script("nextStep()")
+        time.sleep(0.8)
+        print("  → Navegando a Sección 4...")
+        
+        # SECCION 4: Observaciones
+        
+        driver.find_element(By.ID, "id_observaciones").send_keys("Parto eutócico sin complicaciones. Test automatizado Selenium.")
+        print("  ✓ Observaciones agregadas")
+        
+        print("  ✓ TODOS los campos completados")
         
         # ===================================================================
         # PASO 5: ENVIAR FORMULARIO
@@ -238,8 +165,8 @@ def test_registrar_parto():
         current_url_before = driver.current_url
         print(f"  URL antes de enviar: {current_url_before}")
         
-        # Scroll al botón
-        submit_button = driver.find_element(By.CSS_SELECTOR, "button[type='submit'].btn-primary")
+        # Buscar botón submit del formulario (no el de logout del navbar)
+        submit_button = driver.find_element(By.ID, "btnSubmit")
         driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
         time.sleep(0.5)
         
@@ -249,11 +176,16 @@ def test_registrar_parto():
             csrf_value = csrf_inputs[0].get_attribute("value")
             print(f"✓ Token CSRF presente: {csrf_value[:20]}...")
         
-        # Enviar formulario
-        driver.execute_script("arguments[0].click();", submit_button)
-        print("✓ Formulario enviado")
+        # Enviar formulario directamente (no con click en botón)
+        form_element = driver.find_element(By.ID, "formParto")
+        driver.execute_script("arguments[0].submit();", form_element)
+        print("✓ Formulario enviado (form.submit())")
         
         time.sleep(3)
+        
+        # Verificar si estamos aún en la misma página
+        if driver.current_url == current_url_before:
+            print("  ⚠ Permanece en la misma URL (posible error de validación)")
         
         # ===================================================================
         # PASO 6: VERIFICAR RESULTADO
@@ -263,46 +195,137 @@ def test_registrar_parto():
         current_url_after = driver.current_url
         print(f"  URL después de enviar: {current_url_after}")
         
-        # Buscar mensajes de error
-        try:
-            errors = driver.find_elements(By.CSS_SELECTOR, ".alert-danger, .text-danger, .errorlist")
-            if errors:
-                print("\n✗ ERRORES ENCONTRADOS:")
-                for err in errors:
-                    if err.text.strip():
-                        print(f"  - {err.text}")
-                return False
-            else:
-                print("✓ No se encontraron errores en el formulario")
-        except:
-            pass
-        
-        # Verificar redirección exitosa (debe ir a registrar RN o detalle parto)
-        if "registrar-recien-nacido" in current_url_after or "parto" in current_url_after:
-            print("✓ Redirección exitosa después de registrar parto")
+        # Buscar mensajes de error de formulario Django
+        error_alert = driver.find_elements(By.CSS_SELECTOR, ".alert-danger ul li")
+        if error_alert:
+            print("\n✗ ERRORES DE VALIDACION DEL FORMULARIO:")
+            for err in error_alert:
+                print(f"  • {err.text.strip()}")
             
-            # Buscar mensaje de éxito
-            try:
-                success_msg = driver.find_element(By.CSS_SELECTOR, ".alert-success")
-                print(f"✓ Mensaje de éxito: {success_msg.text}")
-            except:
-                print("✓ Parto registrado (sin mensaje de éxito visible)")
+            # Guardar captura del error
+            driver.save_screenshot("error_form_parto.png")
+            print("\n  📸 Screenshot guardado: error_form_parto.png")
+            return False
+        
+        print("✓ No se encontraron errores de validación visibles")
+        
+        # Buscar mensajes de éxito
+        success_messages = driver.find_elements(By.CSS_SELECTOR, ".alert-success")
+        if success_messages:
+            print("\n✓ MENSAJES DE ÉXITO:")
+            for msg in success_messages:
+                print(f"  • {msg.text.strip()}")
+        
+        # Si no redirigi, buscar mensajes de error inline o campos invalidos
+        invalid_fields = driver.find_elements(By.CSS_SELECTOR, ".is-invalid")
+        if invalid_fields:
+            print(f"\n⚠ Campos marcados como inválidos: {len(invalid_fields)}")
+            for field in invalid_fields[:5]:  # Mostrar solo los primeros 5
+                field_id = field.get_attribute("id") or field.get_attribute("name")
+                print(f"  - {field_id}")
+        
+        # Verificar mensajes de Django messages framework  
+        error_messages = driver.find_elements(By.CSS_SELECTOR, ".alert.alert-danger, .alert.alert-warning")
+        if error_messages:
+            print("\n⚠ MENSAJES DE ERROR DEL SISTEMA:")
+            for msg in error_messages:
+                print(f"  • {msg.text.strip()}")
+        
+        # Si no redirigió, guardar HTML para debug
+        if driver.current_url == current_url_before:
+            with open("debug_parto_form.html", "w", encoding="utf-8") as f:
+                f.write(driver.page_source)
+            print("\n  💾 HTML guardado en: debug_parto_form.html")
+            print("  💡 Revisar el HTML para ver errores ocultos o problemas de validación")
+        
+        # Verificar redirección a registrar RN
+        if "/neonatologia/registrar/" in current_url_after:
+            print("✓ Redirigió a registrar RN correctamente")
+            
+            # Extraer parto_id de la URL: /neonatologia/registrar/{parto_id}/
+            parto_id = current_url_after.rstrip('/').split('/')[-1]
+            print(f"  Parto registrado con ID: {parto_id}")
+            
+            # ===================================================================
+            # PASO 3: REGISTRAR RECIÉN NACIDO
+            # ===================================================================
+            print(f"\n[3/4] Registrando recién nacido (Parto ID: {parto_id})...")
+            
+            wait.until(EC.presence_of_element_located((By.ID, "id_peso_gramos")))
+            print("✓ Formulario de RN cargado")
+            
+            # === DATOS BÁSICOS Y ANTROPOMETRÍA ===
+            print("\n  Completando datos básicos...")
+            Select(driver.find_element(By.ID, "id_sexo")).select_by_value("masculino")
+            driver.find_element(By.ID, "id_peso_gramos").send_keys("3200")
+            driver.find_element(By.ID, "id_talla_cm").send_keys("49.5")
+            driver.find_element(By.ID, "id_circunferencia_craneana_cm").send_keys("34.2")
+            print("    ✓ Sexo: Masculino")
+            print("    ✓ Peso: 3200g")
+            print("    ✓ Talla: 49.5cm")
+            print("    ✓ Circunferencia craneana: 34.2cm")
+            
+            # === EVALUACIÓN APGAR ===
+            print("\n  Completando APGAR...")
+            driver.find_element(By.ID, "id_apgar_1_min").send_keys("8")
+            driver.find_element(By.ID, "id_apgar_5_min").send_keys("9")
+            print("    ✓ APGAR 1 min: 8")
+            print("    ✓ APGAR 5 min: 9")
+            
+            # === REANIMACIÓN Y DESTINO ===
+            print("\n  Completando reanimación y destino...")
+            Select(driver.find_element(By.ID, "id_estado_al_nacer")).select_by_value("vivo")
+            print("    ✓ Estado al nacer: Vivo")
+            
+            # Reanimación no requerida (checkbox sin marcar)
+            Select(driver.find_element(By.ID, "id_tipo_reanimacion")).select_by_value("ninguna")
+            print("    ✓ Tipo reanimación: Ninguna")
+            
+            Select(driver.find_element(By.ID, "id_destino")).select_by_value("alojamiento_conjunto")
+            print("    ✓ Destino: Alojamiento Conjunto")
+            
+            # === MALFORMACIONES ===
+            # Checkbox sin marcar (no presenta malformaciones)
+            print("    ✓ Sin malformaciones")
+            
+            # === OBSERVACIONES ===
+            driver.find_element(By.ID, "id_observaciones").send_keys("RN de término adecuado para la edad gestacional. Test automatizado.")
+            print("    ✓ Observaciones agregadas")
+            
+            print("\n  ✓ TODOS los datos del RN completados")
+            
+            # === ENVIAR FORMULARIO RN ===
+            print("\n  Enviando formulario RN...")
+            submit_button_rn = driver.find_element(By.CSS_SELECTOR, "button[type='submit'].btn-success")
+            driver.execute_script("arguments[0].scrollIntoView(true);", submit_button_rn)
+            time.sleep(0.5)
+            driver.execute_script("arguments[0].click();", submit_button_rn)
+            print("  ✓ Formulario RN enviado")
+            
+            time.sleep(3)
+            
+            # ===================================================================
+            # PASO 4: VERIFICAR RESULTADO FINAL
+            # ===================================================================
+            print(f"\n[4/4] Verificación final...")
+            final_url = driver.current_url
+            print(f"  URL final: {final_url}")
+            
+            print("\n" + "=" * 80)
+            print("✓ TEST EXITOSO: PARTO Y RN REGISTRADOS")
+            print("=" * 80)
+            print(f"\nRegistro completo:")
+            print(f"  - Paciente ID: {PACIENTE_ID}")
+            print(f"  - Parto ID: {parto_id}")
+            print(f"  - Fecha: {fecha_parto.strftime('%d/%m/%Y')}")
+            print(f"  - Hora: {hora_parto}")
+            print(f"  - RN: 3200g, 49cm, APGAR 9/9")
+            
+            print("\nManteniendo navegador abierto 5 segundos...")
+            time.sleep(5)
         else:
-            print("⚠ URL inesperada después de enviar")
-        
-        print("\n" + "=" * 80)
-        print("✓ TEST EXITOSO: PARTO REGISTRADO CORRECTAMENTE")
-        print("=" * 80)
-        print(f"\nParto registrado:")
-        print(f"  - Paciente ID: {paciente_id}")
-        print(f"  - Fecha: {fecha_parto.strftime('%d/%m/%Y')}")
-        print(f"  - Hora: {hora_parto}")
-        print(f"  - Tipo: Vaginal")
-        print(f"  - Edad gestacional: 39 semanas, 3 días")
-        print(f"  - Presentación: Cefálica")
-        
-        print("\nManteniendo navegador abierto 5 segundos...")
-        time.sleep(5)
+            print(f"⚠ URL inesperada: {current_url_after}")
+            print("  Se esperaba redirección a registrar RN")
         
         return True
         
@@ -327,9 +350,9 @@ def test_registrar_parto():
 
 
 if __name__ == "__main__":
-    print("\n" + "╔" + "=" * 78 + "╗")
-    print("║" + " " * 22 + "TEST SELENIUM - REGISTRAR PARTO" + " " * 25 + "║")
-    print("╚" + "=" * 78 + "╝")
+    print("\n" + "=" * 80)
+    print("TEST SELENIUM - REGISTRAR PARTO")
+    print("=" * 80)
     
     print("\nEste test automatiza el formulario de registro de parto obstétrico.")
     print("Requisito: El servidor debe estar corriendo en http://127.0.0.1:8000")

@@ -16,3 +16,8 @@
 ```powershell
 .\venv\Scripts\python.exe tests\test_selenium_registrar_parto.py
 ```
+
+### 4. Generar Alerta APGAR Crítico
+```powershell
+.\venv\Scripts\python.exe tests\test_selenium_generar_alerta.py
+```
