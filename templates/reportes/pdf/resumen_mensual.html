@@ -1,0 +1,103 @@
+{% extends 'reportes/pdf/base_pdf.html' %}
+
+{% block title %}Resumen Mensual{% endblock %}
+{% block header_title %}Resumen Estadístico Mensual{% endblock %}
+
+{% block content %}
+<div class="section-title">Resumen Ejecutivo</div>
+
+<div class="stats-grid">
+    <div class="stat-item">
+        <div class="stat-value">{{ total_partos }}</div>
+        <div class="stat-label">Total Partos</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ total_rn }}</div>
+        <div class="stat-label">Recién Nacidos</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ pacientes_nuevas }}</div>
+        <div class="stat-label">Pacientes Nuevas</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ total_alertas }}</div>
+        <div class="stat-label">Alertas Generadas</div>
+    </div>
+</div>
+
+<div class="section-title">Partos por Tipo</div>
+
+<table>
+    <tr>
+        <th>Tipo de Parto</th>
+        <th style="text-align: center;">Cantidad</th>
+        <th style="text-align: center;">Porcentaje</th>
+    </tr>
+    <tr>
+        <td>Partos Vaginales</td>
+        <td style="text-align: center;"><strong>{{ partos_vaginales }}</strong></td>
+        <td style="text-align: center;">{{ porcentaje_vaginales }}%</td>
+    </tr>
+    <tr>
+        <td>Cesáreas</td>
+        <td style="text-align: center;"><strong>{{ cesareas }}</strong></td>
+        <td style="text-align: center;">{{ tasa_cesarea }}%</td>
+    </tr>
+</table>
+
+<div class="section-title">Clasificación Robson</div>
+
+<table>
+    <tr>
+        <th>Grupo</th>
+        <th style="text-align: center;">Total</th>
+        <th style="text-align: center;">Cesáreas</th>
+        <th style="text-align: center;">% del Total</th>
+        <th style="text-align: center;">Tasa Cesárea</th>
+    </tr>
+    {% for grupo in robson_grupos %}
+    <tr>
+        <td>Grupo {{ grupo.grupo_robson }}</td>
+        <td style="text-align: center;">{{ grupo.total }}</td>
+        <td style="text-align: center;">{{ grupo.cesareas }}</td>
+        <td style="text-align: center;">{{ grupo.porcentaje }}%</td>
+        <td style="text-align: center;">{{ grupo.tasa_cesarea }}%</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="section-title">Indicadores Neonatales</div>
+
+<div class="stats-grid">
+    <div class="stat-item">
+        <div class="stat-value">{{ peso_promedio|floatformat:0 }}g</div>
+        <div class="stat-label">Peso Promedio</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ apgar_5_promedio|floatformat:1 }}</div>
+        <div class="stat-label">APGAR 5min Promedio</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ rn_bajo_peso }}</div>
+        <div class="stat-label">RN Bajo Peso</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ rn_apgar_bajo }}</div>
+        <div class="stat-label">RN APGAR < 7</div>
+    </div>
+</div>
+
+<div class="section-title">Conclusiones</div>
+
+<div class="info-box">
+    <p><strong>Tasa de Cesáreas:</strong> {{ tasa_cesarea }}% (Meta: < 25% según OMS)</p>
+    <p><strong>Peso Promedio RN:</strong> {{ peso_promedio|floatformat:0 }}g (Rango normal: 2500-4000g)</p>
+    <p><strong>APGAR Promedio:</strong> {{ apgar_5_promedio|floatformat:1 }} puntos (Óptimo: ≥ 7)</p>
+    {% if rn_bajo_peso > 0 %}
+    <p><strong>Atención:</strong> {{ rn_bajo_peso }} recién nacidos con bajo peso al nacer requieren seguimiento.</p>
+    {% endif %}
+    {% if rn_apgar_bajo > 0 %}
+    <p><strong>Atención:</strong> {{ rn_apgar_bajo }} recién nacidos con APGAR crítico.</p>
+    {% endif %}
+</div>
+{% endblock %}

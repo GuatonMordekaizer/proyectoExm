@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle del Parto #{{ parto.id }} - Hospital HHM{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'detalle_paciente' parto.paciente.id %}">{{ parto.paciente.nombre_completo }}</a></li>
+                    <li class="breadcrumb-item active">Parto #{{ parto.id }}</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold">
+                <i class="bi bi-heart-pulse text-danger"></i> Detalle del Parto
+            </h2>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'generar_pdf_parto' parto.id %}" class="btn btn-outline-danger" target="_blank">
+                <i class="bi bi-file-pdf"></i> Generar PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Información de la Paciente -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-fill"></i> Información de la Paciente</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Nombre:</strong> {{ parto.paciente.nombre_completo }}<br>
+                            <strong>RUT:</strong> {{ parto.paciente.rut }}<br>
+                            <strong>Edad:</strong> {{ parto.paciente.edad }} años
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Previsión:</strong> {{ parto.paciente.get_prevision_display }}<br>
+                            <strong>Teléfono:</strong> {{ parto.paciente.telefono|default:"No registrado" }}
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'detalle_paciente' parto.paciente.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i> Ver Ficha Completa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Datos del Parto -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-calendar-event"></i> Información del Parto</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="40%">Fecha y Hora:</th>
+                            <td>{{ parto.fecha_parto|date:"d/m/Y" }} - {{ parto.hora_parto }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tipo de Parto:</th>
+                            <td><span class="badge bg-secondary">{{ parto.get_tipo_parto_display }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Edad Gestacional:</th>
+                            <td>{{ parto.edad_gestacional_semanas }} sem {{ parto.edad_gestacional_dias }} días</td>
+                        </tr>
+                        <tr>
+                            <th>Presentación:</th>
+                            <td>{{ parto.get_presentacion_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Inicio Trabajo Parto:</th>
+                            <td>{{ parto.get_inicio_trabajo_parto_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Grupo Robson:</th>
+                            <td><span class="badge bg-warning text-dark fs-6">Grupo {{ parto.grupo_robson }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Registrado por:</th>
+                            <td>{{ parto.usuario_registro.get_full_name }} ({{ parto.usuario_registro.get_rol_display }})</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recién Nacido -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-baby-fill"></i> Recién Nacido</h5>
+                </div>
+                <div class="card-body">
+                    {% if parto.recien_nacido %}
+                    <div class="text-center mb-3">
+                        <i class="bi bi-{% if parto.recien_nacido.sexo == 'masculino' %}gender-male text-primary{% else %}gender-female text-danger{% endif %}" style="font-size: 3rem;"></i>
+                        <h4 class="mt-2">{{ parto.recien_nacido.get_sexo_display }}</h4>
+                    </div>
+                    <table class="table table-sm">
+                        <tr>
+                            <th width="50%">Peso:</th>
+                            <td><strong>{{ parto.recien_nacido.peso_gramos }} g</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Talla:</th>
+                            <td><strong>{{ parto.recien_nacido.talla_cm }} cm</strong></td>
+                        </tr>
+                        <tr>
+                            <th>CC:</th>
+                            <td>{{ parto.recien_nacido.circunferencia_craneana_cm|default:"-" }} cm</td>
+                        </tr>
+                        <tr>
+                            <th>APGAR 1 min:</th>
+                            <td><span class="badge {% if parto.recien_nacido.apgar_1_min < 7 %}bg-danger{% else %}bg-success{% endif %}">{{ parto.recien_nacido.apgar_1_min }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>APGAR 5 min:</th>
+                            <td><span class="badge {% if parto.recien_nacido.apgar_5_min < 7 %}bg-danger{% else %}bg-success{% endif %}">{{ parto.recien_nacido.apgar_5_min }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>APGAR 10 min:</th>
+                            <td>
+                                {% if parto.recien_nacido.apgar_10_min %}
+                                <span class="badge {% if parto.recien_nacido.apgar_10_min < 7 %}bg-danger{% else %}bg-success{% endif %}">{{ parto.recien_nacido.apgar_10_min }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Destino:</th>
+                            <td><span class="badge bg-info">{{ parto.recien_nacido.get_destino_display }}</span></td>
+                        </tr>
+                    </table>
+                    <div class="d-grid">
+                        <a href="{% url 'detalle_recien_nacido' parto.recien_nacido.pk %}" class="btn btn-success">
+                            <i class="bi bi-eye"></i> Ver Ficha Completa RN
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-exclamation-circle text-warning" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3">No se ha registrado el Recién Nacido aún.</p>
+                        <a href="{% url 'registrar_recien_nacido' parto.pk %}" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Registrar Recién Nacido
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="row mt-3">
+        <div class="col text-center">
+            <a href="{% url 'detalle_paciente' parto.paciente.id %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a Paciente
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

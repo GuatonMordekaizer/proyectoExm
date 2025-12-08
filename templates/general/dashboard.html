@@ -1,0 +1,455 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - {{ user.get_rol_display }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-speedometer2 text-primary"></i> Dashboard
+            </h2>
+            <p class="text-muted mb-0">Bienvenido/a {{ user.get_full_name }} - {{ user.get_rol_display }}</p>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-people text-primary" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-3 mb-1 fw-bold">{{ pacientes_nuevos_hoy }}</h3>
+                    <p class="text-muted mb-0 small">Pacientes Nuevos Hoy</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-heart-pulse text-danger" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-3 mb-1 fw-bold">{{ partos_hoy }}</h3>
+                    <p class="text-muted mb-0 small">Partos Hoy</p>
+                    <small class="text-muted">{{ partos_mes }} este mes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-plus text-success" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-3 mb-1 fw-bold">{{ rn_hoy }}</h3>
+                    <p class="text-muted mb-0 small">Recién Nacidos Hoy</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-3 mb-1 fw-bold">{{ alertas_criticas }}</h3>
+                    <p class="text-muted mb-0 small">Alertas Críticas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos Estadísticos -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-pie-chart text-primary"></i> Partos por Tipo (Este Mes)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartPartosTipo" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-bar-chart text-success"></i> Peso Recién Nacidos (Este Mes)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartPesoRN" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-graph-up text-info"></i> Partos Últimos 7 Días</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartPartos7Dias" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-flag text-warning"></i> Grupos Robson</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartGruposRobson" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accesos Rápidos y Información del Usuario -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-lightning text-primary"></i> Accesos Rápidos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% if user.puede_registrar_parto %}
+                        <div class="col-md-6">
+                            <a href="{% url 'buscar_paciente' %}"
+                                class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center">
+                                <i class="bi bi-search fs-3 mb-2"></i>
+                                <span>Buscar Paciente</span>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'crear_paciente' %}"
+                                class="btn btn-outline-success w-100 py-3 d-flex flex-column align-items-center">
+                                <i class="bi bi-person-plus fs-3 mb-2"></i>
+                                <span>Nueva Paciente</span>
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if user.puede_generar_reportes %}
+                        <div class="col-md-6">
+                            <a href="{% url 'seleccionar_reporte' %}" class="btn btn-outline-info w-100 py-3 d-flex flex-column align-items-center">
+                                <i class="bi bi-bar-chart fs-3 mb-2"></i>
+                                <span>Reportes</span>
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if user.rol == 'jefe_servicio' or user.rol == 'administrativo' %}
+                        <div class="col-md-6">
+                            <a href="{% url 'historial_auditoria' %}"
+                                class="btn btn-outline-warning w-100 py-3 d-flex flex-column align-items-center">
+                                <i class="bi bi-clock-history fs-3 mb-2"></i>
+                                <span>Auditoría</span>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del Usuario -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-person-badge text-primary"></i> Mi Información</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="small text-muted text-uppercase fw-bold">Nombre Completo</label>
+                        <p class="mb-0">{{ user.get_full_name }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small text-muted text-uppercase fw-bold">RUT</label>
+                        <p class="mb-0 font-monospace">{{ user.rut }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small text-muted text-uppercase fw-bold">Rol</label>
+                        <p class="mb-0"><span class="badge bg-primary">{{ user.get_rol_display }}</span></p>
+                    </div>
+                    <div class="mb-0">
+                        <label class="small text-muted text-uppercase fw-bold">Último Acceso</label>
+                        <p class="mb-0">
+                            {% if user.ultimo_acceso %}
+                            {{ user.ultimo_acceso|date:"d/m/Y H:i" }}
+                            {% else %}
+                            <span class="text-muted">Primer acceso</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Actividad Reciente -->
+<div class="row">
+    {% if ultimos_partos %}
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history text-primary"></i> Últimos Partos</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for parto in ultimos_partos %}
+                    <a href="{% url 'detalle_parto' parto.id %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ parto.paciente.nombre_completo }}</h6>
+                                <small class="text-muted">
+                                    {{ parto.fecha_parto|date:"d/m/Y" }} - {{ parto.get_tipo_parto_display }}
+                                </small>
+                            </div>
+                            <span class="badge bg-light text-dark border">Grupo {{ parto.grupo_robson }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if alertas_recientes %}
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm border-warning h-100">
+            <div class="card-header bg-warning-subtle border-bottom">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle text-warning"></i> Alertas Recientes</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for rn in alertas_recientes %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">RN de {{ rn.parto.paciente.nombre_completo }}</h6>
+                                <small class="text-muted d-block">{{ rn.created_at|date:"d/m/Y H:i" }}</small>
+                                {% if rn.apgar_5_min < 7 %}
+                                <span class="badge bg-danger mt-1">APGAR 5min: {{ rn.apgar_5_min }}</span>
+                                {% endif %}
+                                {% if rn.peso_gramos < 2500 %}
+                                <span class="badge bg-warning mt-1">Bajo peso: {{ rn.peso_gramos }}g</span>
+                                {% endif %}
+                                {% if rn.reanimacion_requerida %}
+                                <span class="badge bg-info mt-1">Reanimación</span>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'detalle_recien_nacido' rn.pk %}" class="btn btn-sm btn-outline-primary">Ver</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if user.rol in 'matrona,medico_obstetra,pediatra,enfermera_neonatal' %}
+    {% if not ultimos_partos and not alertas_recientes %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3 text-muted">No hay actividad reciente</h5>
+                    <p class="text-muted mb-0">Los registros aparecerán aquí cuando se ingresen datos al sistema.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// Configuración común para todos los gráficos
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#64748b';
+
+// 1. Gráfico de Partos por Tipo (Doughnut)
+const ctxPartosTipo = document.getElementById('chartPartosTipo');
+if (ctxPartosTipo) {
+    new Chart(ctxPartosTipo, {
+        type: 'doughnut',
+        data: {
+            labels: ['Partos Vaginales', 'Cesáreas'],
+            datasets: [{
+                data: [{{ partos_vaginales }}, {{ cesareas }}],
+                backgroundColor: ['#10b981', '#ef4444'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: {
+                            size: 13
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = {{ partos_vaginales }} + {{ cesareas }};
+                            const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                            return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 2. Gráfico de Peso RN (Bar)
+const ctxPesoRN = document.getElementById('chartPesoRN');
+if (ctxPesoRN) {
+    new Chart(ctxPesoRN, {
+        type: 'bar',
+        data: {
+            labels: ['Bajo Peso\n(<2500g)', 'Peso Normal\n(2500-4000g)', 'Macrosómico\n(>4000g)'],
+            datasets: [{
+                label: 'Recién Nacidos',
+                data: [{{ rn_bajo_peso }}, {{ rn_peso_normal }}, {{ rn_macrosomico }}],
+                backgroundColor: ['#f59e0b', '#10b981', '#3b82f6'],
+                borderWidth: 0,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: '#e2e8f0'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 3. Gráfico de Partos 7 Días (Line)
+const ctxPartos7Dias = document.getElementById('chartPartos7Dias');
+if (ctxPartos7Dias) {
+    new Chart(ctxPartos7Dias, {
+        type: 'line',
+        data: {
+            labels: {{ ultimos_7_dias|safe }},
+            datasets: [{
+                label: 'Partos',
+                data: {{ partos_7_dias|safe }},
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: '#3b82f6'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: '#e2e8f0'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 4. Gráfico de Grupos Robson (Horizontal Bar)
+const ctxGruposRobson = document.getElementById('chartGruposRobson');
+if (ctxGruposRobson) {
+    const gruposData = {{ grupos_robson|safe }};
+    const labels = gruposData.map(g => 'G' + g.grupo_robson);
+    const valores = gruposData.map(g => g.total);
+    
+    new Chart(ctxGruposRobson, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Partos',
+                data: valores,
+                backgroundColor: '#f59e0b',
+                borderWidth: 0,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: '#e2e8f0'
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

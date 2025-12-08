@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión - Hospital Herminda Martín{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-hospital text-primary" style="font-size: 3rem;"></i>
+                        <h3 class="mt-3">Sistema Obstétrico</h3>
+                        <p class="text-muted">Hospital Herminda Martín</p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="bi bi-person"></i> RUT o Usuario
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="username" name="username"
+                                placeholder="12.345.678-9 o usuario" required autofocus>
+                            <div class="form-text">
+                                Ingrese su RUT (con puntos y guión) o nombre de usuario
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="bi bi-lock"></i> Contraseña
+                            </label>
+                            <input type="password" class="form-control form-control-lg" id="password" name="password"
+                                required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                        </button>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <small class="text-muted">
+                            <i class="bi bi-shield-check"></i>
+                            Acceso seguro con auditoría completa
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    ¿Problemas para acceder? Contacte al administrador del sistema
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .card {
+        border: none;
+        border-radius: 1rem;
+    }
+</style>
+{% endblock %}

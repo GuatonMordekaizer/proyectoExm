@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ titulo }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Por favor corrija los errores:</strong>
+                            <ul class="mb-0 mt-2">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ field }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        {% for field in form %}
+                        {% if field.name != 'password' %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in field.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </form>
+
+                    {% if form.instance.pk %}
+                    <hr class="my-4">
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading"><i class="bi bi-shield-lock"></i> Gestión de Contraseña</h6>
+                        <p class="mb-3">Opciones para gestionar la contraseña de este usuario:</p>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'cambiar_password' form.instance.pk %}" class="btn btn-warning btn-sm">
+                                <i class="bi bi-key"></i> Cambiar Contraseña
+                            </a>
+                            <form method="post" action="{% url 'restablecer_password' form.instance.pk %}" style="display: inline;" onsubmit="return confirm('¿Generar contraseña temporal para {{ form.instance.username }}? El usuario deberá cambiarla en su próximo login.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-arrow-clockwise"></i> Restablecer (Generar Temporal)
+                                </button>
+                            </form>
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            <strong>Restablecer:</strong> Genera una contraseña temporal aleatoria que el usuario debe cambiar en su primer login.
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

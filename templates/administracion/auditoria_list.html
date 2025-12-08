@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+
+{% block title %}Historial de Auditoría{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Auditoría del Sistema</h2>
+            <p class="text-muted mb-0">Registro inmutable de acciones</p>
+        </div>
+        <div>
+            <span class="badge bg-white text-secondary border shadow-sm p-2">
+                <i class="bi bi-shield-lock me-1"></i> Logs Seguros
+            </span>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Usuario</label>
+                    <select name="usuario" class="form-select bg-light border-0">
+                        <option value="">Todos los usuarios</option>
+                        {% for u in usuarios %}
+                        <option value="{{ u.id }}" {% if request.GET.usuario|stringformat:"s" == u.id|stringformat:"s" %}selected{% endif %}>
+                            {% if u.get_full_name %}{{ u.get_full_name }}{% else %}{{ u.username }}{% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Acción</label>
+                    <select name="accion" class="form-select bg-light border-0">
+                        <option value="">Todas</option>
+                        {% for key, value in ACCION_CHOICES %}
+                        <option value="{{ key }}" {% if request.GET.accion == key %}selected{% endif %}>
+                            {{ value }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Desde</label>
+                    <input type="date" name="fecha_inicio" class="form-control bg-light border-0"
+                        value="{{ request.GET.fecha_inicio }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Hasta</label>
+                    <input type="date" name="fecha_fin" class="form-control bg-light border-0"
+                        value="{{ request.GET.fecha_fin }}">
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        Filtrar
+                    </button>
+                    <a href="{% url 'historial_auditoria' %}" class="btn btn-light border" title="Limpiar">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de Logs -->
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light border-bottom">
+                    <tr>
+                        <th class="px-4 py-3 text-secondary small fw-bold text-uppercase">Fecha</th>
+                        <th class="py-3 text-secondary small fw-bold text-uppercase">Usuario</th>
+                        <th class="py-3 text-secondary small fw-bold text-uppercase">Acción</th>
+                        <th class="py-3 text-secondary small fw-bold text-uppercase">Detalle</th>
+                        <th class="px-4 py-3 text-end text-secondary small fw-bold text-uppercase">Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in page_obj %}
+                    <tr>
+                        <td class="px-4 py-3" style="white-space: nowrap;">
+                            <div class="fw-medium text-dark">{{ log.timestamp|date:"d/m/Y" }}</div>
+                            <div class="small text-muted">{{ log.timestamp|date:"H:i" }}</div>
+                        </td>
+                        <td class="py-3">
+                            {% if log.usuario %}
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-circle bg-light text-primary"
+                                    style="width: 28px; height: 28px; font-size: 0.75rem;">
+                                    {% if log.usuario.first_name %}{{ log.usuario.first_name|first }}{% endif %}{% if log.usuario.last_name %}{{ log.usuario.last_name|first }}{% else %}U{% endif %}
+                                </div>
+                                <span class="fw-medium text-dark">
+                                    {% if log.usuario.get_full_name %}
+                                        {{ log.usuario.get_full_name }}
+                                    {% else %}
+                                        {{ log.usuario.username }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            {% else %}
+                            <span class="text-muted fst-italic">Sistema</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3">
+                            {% if log.accion == 'login' %}
+                            <span
+                                class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">Login</span>
+                            {% elif log.accion == 'logout' %}
+                            <span
+                                class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2">Logout</span>
+                            {% elif log.accion == 'login_fallido' %}
+                            <span
+                                class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2">Fallido</span>
+                            {% elif log.accion == 'crear' %}
+                            <span
+                                class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2">Crear</span>
+                            {% elif log.accion == 'editar' %}
+                            <span
+                                class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2">Editar</span>
+                            {% else %}
+                            <span class="badge bg-light text-dark border rounded-pill px-2">{{ log.get_accion_display
+                                }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3">
+                            {% if log.modelo %}
+                            <span class="fw-medium text-dark">{{ log.modelo }} #{{ log.objeto_id }}</span>
+                            {% endif %}
+                            <div class="small text-muted text-truncate" style="max-width: 250px;">{{ log.descripcion }}
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-end">
+                            <button type="button" class="btn btn-sm btn-light border text-muted" data-bs-toggle="modal"
+                                data-bs-target="#modalDetalle" data-fecha="{{ log.timestamp|date:'d/m/Y H:i:s' }}"
+                                data-usuario="{% if log.usuario %}{% if log.usuario.get_full_name %}{{ log.usuario.get_full_name }}{% else %}{{ log.usuario.username }}{% endif %}{% else %}Sistema{% endif %}"
+                                data-accion="{{ log.get_accion_display }}" data-descripcion="{{ log.descripcion }}"
+                                data-ip="{{ log.ip_address|default:'N/A' }}"
+                                data-antes="{{ log.datos_anteriores|default_if_none:'' }}"
+                                data-despues="{{ log.datos_nuevos|default_if_none:'' }}">
+                                <i class="bi bi-eye"></i> Detalle
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            No se encontraron registros.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white border-top py-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span class="small text-muted">
+                    {% if page_obj %}
+                    Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+                    registros
+                    {% else %}
+                    Sin registros
+                    {% endif %}
+                </span>
+
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Paginación">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="bi bi-chevron-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="bi bi-chevron-double-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold">Detalle de Auditoría</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-4">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="small text-muted text-uppercase fw-bold">Usuario</label>
+                        <div class="fw-medium" id="modalUsuario"></div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <label class="small text-muted text-uppercase fw-bold">Fecha</label>
+                        <div class="fw-medium" id="modalFecha"></div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-light rounded mb-4">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="small text-muted text-uppercase fw-bold">Acción</label>
+                            <div class="text-primary fw-bold" id="modalAccion"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="small text-muted text-uppercase fw-bold">IP</label>
+                            <div class="font-monospace small" id="modalIP"></div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="small text-muted text-uppercase fw-bold">Descripción</label>
+                        <div id="modalDescripcion"></div>
+                    </div>
+                </div>
+
+                <div id="cambiosContainer" class="d-none">
+                    <h6 class="fw-bold border-bottom pb-2 mb-3">Cambios Realizados</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-danger-subtle border-danger-subtle h-100">
+                                <div
+                                    class="card-header bg-transparent border-danger-subtle text-danger fw-bold py-2 small">
+                                    ANTES
+                                </div>
+                                <div class="card-body p-2">
+                                    <pre class="small mb-0" id="modalAntes" style="white-space: pre-wrap;"></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-success-subtle border-success-subtle h-100">
+                                <div
+                                    class="card-header bg-transparent border-success-subtle text-success fw-bold py-2 small">
+                                    DESPUÉS
+                                </div>
+                                <div class="card-body p-2">
+                                    <pre class="small mb-0" id="modalDespues" style="white-space: pre-wrap;"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const modalDetalle = document.getElementById('modalDetalle');
+    modalDetalle.addEventListener('show.bs.modal', event => {
+        const button = event.relatedTarget;
+
+        // Basic Info
+        document.getElementById('modalFecha').textContent = button.getAttribute('data-fecha');
+        document.getElementById('modalUsuario').textContent = button.getAttribute('data-usuario');
+        document.getElementById('modalAccion').textContent = button.getAttribute('data-accion');
+        document.getElementById('modalDescripcion').textContent = button.getAttribute('data-descripcion');
+        document.getElementById('modalIP').textContent = button.getAttribute('data-ip');
+
+        // Changes (JSON)
+        const antesRaw = button.getAttribute('data-antes');
+        const despuesRaw = button.getAttribute('data-despues');
+        const container = document.getElementById('cambiosContainer');
+
+        // Helper to format JSON if it's a string representation of a dict
+        const formatJSON = (str) => {
+            if (!str || str === 'None') return '';
+            try {
+                const jsonStr = str.replace(/'/g, '"').replace(/None/g, 'null').replace(/True/g, 'true').replace(/False/g, 'false');
+                const obj = JSON.parse(jsonStr);
+                return JSON.stringify(obj, null, 2);
+            } catch (e) {
+                return str;
+            }
+        };
+
+        if (antesRaw || despuesRaw) {
+            container.classList.remove('d-none');
+            document.getElementById('modalAntes').textContent = formatJSON(antesRaw) || 'Sin datos previos';
+            document.getElementById('modalDespues').textContent = formatJSON(despuesRaw) || 'Sin datos nuevos';
+        } else {
+            container.classList.add('d-none');
+        }
+    });
+</script>
+{% endblock %}

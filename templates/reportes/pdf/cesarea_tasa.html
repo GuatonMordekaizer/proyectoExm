@@ -1,0 +1,83 @@
+{% extends 'reportes/pdf/base_pdf.html' %}
+
+{% block title %}Tasa de Cesáreas{% endblock %}
+{% block header_title %}Análisis de Tasa de Cesáreas{% endblock %}
+
+{% block content %}
+<div class="section-title">Resumen General</div>
+
+<div class="stats-grid">
+    <div class="stat-item">
+        <div class="stat-value">{{ total_partos }}</div>
+        <div class="stat-label">Total Partos</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ total_cesareas }}</div>
+        <div class="stat-label">Total Cesáreas</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ total_vaginales }}</div>
+        <div class="stat-label">Partos Vaginales</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ tasa_cesarea }}%</div>
+        <div class="stat-label">Tasa de Cesáreas</div>
+    </div>
+</div>
+
+<div class="section-title">Distribución de Cesáreas</div>
+
+<table>
+    <tr>
+        <th>Tipo de Cesárea</th>
+        <th style="text-align: center;">Cantidad</th>
+        <th style="text-align: center;">% de Cesáreas</th>
+        <th style="text-align: center;">% del Total</th>
+    </tr>
+    <tr>
+        <td><span class="badge badge-info">Electiva</span> Programada</td>
+        <td style="text-align: center;"><strong>{{ cesareas_electiva }}</strong></td>
+        <td style="text-align: center;">{{ porcentaje_electiva }}%</td>
+        <td style="text-align: center;">{{ porcentaje_electiva_total }}%</td>
+    </tr>
+    <tr>
+        <td><span class="badge badge-warning">Urgencia</span> Durante trabajo de parto</td>
+        <td style="text-align: center;"><strong>{{ cesareas_urgencia }}</strong></td>
+        <td style="text-align: center;">{{ porcentaje_urgencia }}%</td>
+        <td style="text-align: center;">{{ porcentaje_urgencia_total }}%</td>
+    </tr>
+</table>
+
+<div class="section-title">Indicaciones de Cesárea</div>
+
+<table>
+    <tr>
+        <th>Indicación</th>
+        <th style="text-align: center;">Cantidad</th>
+        <th style="text-align: center;">Porcentaje</th>
+    </tr>
+    {% for indicacion in indicaciones %}
+    <tr>
+        <td>{{ indicacion.indicacion }}</td>
+        <td style="text-align: center;">{{ indicacion.total }}</td>
+        <td style="text-align: center;">{{ indicacion.porcentaje }}%</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="section-title">Análisis Comparativo</div>
+
+<div class="info-box">
+    <p><strong>Meta OMS:</strong> La Organización Mundial de la Salud recomienda una tasa de cesáreas entre 10% y 15%.</p>
+    <p><strong>Tasa actual:</strong> {{ tasa_cesarea }}%
+        {% if tasa_cesarea|floatformat:0|add:"0" <= 15 %}
+        <span class="badge badge-success">Dentro de recomendaciones</span>
+        {% elif tasa_cesarea|floatformat:0|add:"0" <= 25 %}
+        <span class="badge badge-warning">Por encima de lo recomendado</span>
+        {% else %}
+        <span class="badge badge-danger">Significativamente elevada</span>
+        {% endif %}
+    </p>
+    <p><strong>Relación Electiva/Urgencia:</strong> {{ porcentaje_electiva }}% electivas vs {{ porcentaje_urgencia }}% urgencias</p>
+</div>
+{% endblock %}

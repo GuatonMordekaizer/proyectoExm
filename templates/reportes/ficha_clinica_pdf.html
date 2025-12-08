@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @page {
+            size: letter portrait;
+            margin: 2cm;
+        }
+
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+
+        .title {
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .subtitle {
+            font-size: 12pt;
+            color: #666;
+        }
+
+        .section {
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            background-color: #eee;
+            padding: 5px;
+            margin-bottom: 10px;
+            border-left: 5px solid #0d6efd;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        th,
+        td {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            font-weight: bold;
+            color: #333;
+            width: 30%;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 8pt;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 5px;
+        }
+
+        .alert {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="title">Hospital Clínico Herminda Martín</div>
+        <div class="subtitle">Ficha Clínica Obstétrica y Neonatal</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">1. Identificación de la Paciente</div>
+        <table>
+            <tr>
+                <th>Nombre Completo:</th>
+                <td>{{ paciente.nombre_completo }}</td>
+            </tr>
+            <tr>
+                <th>RUT:</th>
+                <td>{{ paciente.rut }}</td>
+            </tr>
+            <tr>
+                <th>Edad:</th>
+                <td>{{ paciente.edad }} años</td>
+            </tr>
+            <tr>
+                <th>Previsión:</th>
+                <td>{{ paciente.get_prevision_display }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. Datos del Parto</div>
+        <table>
+            <tr>
+                <th>Fecha y Hora:</th>
+                <td>{{ parto.fecha_parto|date:"d/m/Y" }} {{ parto.hora_parto }}</td>
+            </tr>
+            <tr>
+                <th>Tipo de Parto:</th>
+                <td>{{ parto.get_tipo_parto_display }}</td>
+            </tr>
+            <tr>
+                <th>Edad Gestacional:</th>
+                <td>{{ parto.edad_gestacional_semanas }} semanas {{ parto.edad_gestacional_dias }} días</td>
+            </tr>
+            <tr>
+                <th>Clasificación Robson:</th>
+                <td>Grupo {{ parto.grupo_robson }}</td>
+            </tr>
+            <tr>
+                <th>Profesional:</th>
+                <td>{{ parto.usuario_registro.get_full_name }} ({{ parto.usuario_registro.get_rol_display }})</td>
+            </tr>
+        </table>
+    </div>
+
+    {% if rn %}
+    <div class="section">
+        <div class="section-title">3. Recién Nacido</div>
+        <table>
+            <tr>
+                <th>Sexo:</th>
+                <td>{{ rn.get_sexo_display }}</td>
+            </tr>
+            <tr>
+                <th>Peso:</th>
+                <td>{{ rn.peso_gramos }} g ({{ rn.clasificacion_peso }})</td>
+            </tr>
+            <tr>
+                <th>Talla:</th>
+                <td>{{ rn.talla_cm }} cm</td>
+            </tr>
+            <tr>
+                <th>APGAR (1'/5'):</th>
+                <td>
+                    {{ rn.apgar_1_min }} /
+                    <span class="{% if rn.apgar_5_critico %}alert{% endif %}">{{ rn.apgar_5_min }}</span>
+                </td>
+            </tr>
+            <tr>
+                <th>Destino:</th>
+                <td>{{ rn.get_destino_display }}</td>
+            </tr>
+        </table>
+    </div>
+    {% else %}
+    <div class="section">
+        <div class="section-title">3. Recién Nacido</div>
+        <p>No registrado.</p>
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <div class="section-title">4. Observaciones</div>
+        <p>{{ parto.observaciones|default:"Sin observaciones." }}</p>
+    </div>
+
+    <div class="footer">
+        Generado el {% now "d/m/Y H:i" %} por {{ user.get_full_name }} | Sistema HHM
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,98 @@
+{% extends 'reportes/pdf/base_pdf.html' %}
+
+{% block title %}Bajo Peso al Nacer{% endblock %}
+{% block header_title %}Recién Nacidos con Bajo Peso{% endblock %}
+
+{% block content %}
+<div class="section-title">Resumen</div>
+
+<div class="stats-grid">
+    <div class="stat-item">
+        <div class="stat-value">{{ recien_nacidos|length }}</div>
+        <div class="stat-label">Total RN < 2500g</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ rn_muy_bajo_peso }}</div>
+        <div class="stat-label">< 1500g</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ peso_promedio|floatformat:0 }}g</div>
+        <div class="stat-label">Peso Promedio</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ rn_pretermino }}</div>
+        <div class="stat-label">< 37 semanas</div>
+    </div>
+</div>
+
+<div class="section-title">Listado Detallado</div>
+
+<table>
+    <tr>
+        <th>Fecha Nacimiento</th>
+        <th>Madre</th>
+        <th>Tipo Parto</th>
+        <th style="text-align: center;">Peso (g)</th>
+        <th style="text-align: center;">EG (sem)</th>
+        <th style="text-align: center;">APGAR 5min</th>
+        <th>Clasificación</th>
+    </tr>
+    {% for rn in recien_nacidos %}
+    <tr>
+        <td>{{ rn.parto.fecha_parto|date:"d/m/Y" }}</td>
+        <td>{{ rn.parto.paciente.nombre }} {{ rn.parto.paciente.apellido }}</td>
+        <td>
+            {% if rn.parto.tipo_parto == 'cesarea' %}
+            <span class="badge badge-danger">Cesárea</span>
+            {% else %}
+            <span class="badge badge-success">Vaginal</span>
+            {% endif %}
+        </td>
+        <td style="text-align: center;">
+            {% if rn.peso_gramos < 1500 %}
+            <span class="badge badge-danger">{{ rn.peso_gramos }}</span>
+            {% else %}
+            <span class="badge badge-warning">{{ rn.peso_gramos }}</span>
+            {% endif %}
+        </td>
+        <td style="text-align: center;">{{ rn.parto.edad_gestacional }}</td>
+        <td style="text-align: center;">
+            {% if rn.apgar_5_min < 7 %}
+            <span class="badge badge-danger">{{ rn.apgar_5_min }}</span>
+            {% else %}
+            {{ rn.apgar_5_min }}
+            {% endif %}
+        </td>
+        <td>
+            {% if rn.peso_gramos < 1500 %}
+            <span class="badge badge-danger">Muy Bajo Peso</span>
+            {% else %}
+            <span class="badge badge-warning">Bajo Peso</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="7" style="text-align: center; color: #28a745;">
+            No se registraron recién nacidos con bajo peso en el período seleccionado.
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="section-title">Observaciones Clínicas</div>
+
+<div class="info-box">
+    <p><strong>Clasificación de Peso al Nacer:</strong></p>
+    <ul style="margin-left: 20px; font-size: 9pt;">
+        <li><strong>Muy bajo peso:</strong> < 1500g - Requiere cuidados intensivos neonatales</li>
+        <li><strong>Bajo peso:</strong> 1500-2499g - Requiere monitoreo estrecho</li>
+        <li><strong>Peso normal:</strong> 2500-3999g</li>
+    </ul>
+    <p><strong>Factores de riesgo:</strong> Prematuridad, restricción del crecimiento intrauterino, gestación múltiple, complicaciones maternas.</p>
+    <p><strong>Seguimiento:</strong> Todos los RN con bajo peso requieren seguimiento pediátrico y nutricional especializado.</p>
+    {% if rn_muy_bajo_peso > 0 %}
+    <p><strong>Atención especial:</strong> {{ rn_muy_bajo_peso }} recién nacidos con muy bajo peso requieren cuidados intensivos.</p>
+    {% endif %}
+</div>
+{% endblock %}

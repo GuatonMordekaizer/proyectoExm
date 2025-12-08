@@ -1,0 +1,98 @@
+{% extends 'reportes/pdf/base_pdf.html' %}
+
+{% block title %}APGAR Crítico{% endblock %}
+{% block header_title %}Recién Nacidos con APGAR Crítico{% endblock %}
+
+{% block content %}
+<div class="section-title">Resumen</div>
+
+<div class="stats-grid">
+    <div class="stat-item">
+        <div class="stat-value">{{ recien_nacidos|length }}</div>
+        <div class="stat-label">RN con APGAR < 7</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ apgar_1_critico }}</div>
+        <div class="stat-label">APGAR 1min crítico</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ apgar_5_critico }}</div>
+        <div class="stat-label">APGAR 5min crítico</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ rn_reanimacion }}</div>
+        <div class="stat-label">Requirió reanimación</div>
+    </div>
+</div>
+
+<div class="section-title">Listado Detallado</div>
+
+<table>
+    <tr>
+        <th>Fecha Nacimiento</th>
+        <th>Madre</th>
+        <th>Tipo Parto</th>
+        <th style="text-align: center;">Peso (g)</th>
+        <th style="text-align: center;">APGAR 1min</th>
+        <th style="text-align: center;">APGAR 5min</th>
+        <th style="text-align: center;">Reanimación</th>
+    </tr>
+    {% for rn in recien_nacidos %}
+    <tr>
+        <td>{{ rn.parto.fecha_parto|date:"d/m/Y" }}</td>
+        <td>{{ rn.parto.paciente.nombre }} {{ rn.parto.paciente.apellido }}</td>
+        <td>
+            {% if rn.parto.tipo_parto == 'cesarea' %}
+            <span class="badge badge-danger">Cesárea</span>
+            {% else %}
+            <span class="badge badge-success">Vaginal</span>
+            {% endif %}
+        </td>
+        <td style="text-align: center;">{{ rn.peso_gramos }}</td>
+        <td style="text-align: center;">
+            {% if rn.apgar_1_min < 4 %}
+            <span class="badge badge-danger">{{ rn.apgar_1_min }}</span>
+            {% elif rn.apgar_1_min < 7 %}
+            <span class="badge badge-warning">{{ rn.apgar_1_min }}</span>
+            {% else %}
+            {{ rn.apgar_1_min }}
+            {% endif %}
+        </td>
+        <td style="text-align: center;">
+            {% if rn.apgar_5_min < 4 %}
+            <span class="badge badge-danger">{{ rn.apgar_5_min }}</span>
+            {% elif rn.apgar_5_min < 7 %}
+            <span class="badge badge-warning">{{ rn.apgar_5_min }}</span>
+            {% else %}
+            {{ rn.apgar_5_min }}
+            {% endif %}
+        </td>
+        <td style="text-align: center;">
+            {% if rn.reanimacion_requerida %}
+            <span class="badge badge-danger">Sí</span>
+            {% else %}
+            <span class="badge badge-success">No</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="7" style="text-align: center; color: #28a745;">
+            No se registraron recién nacidos con APGAR crítico en el período seleccionado.
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="section-title">Observaciones</div>
+
+<div class="info-box">
+    <p><strong>APGAR Score:</strong> Evaluación del estado del recién nacido a 1 y 5 minutos de vida.</p>
+    <ul style="margin-left: 20px; font-size: 9pt;">
+        <li><strong>7-10 puntos:</strong> Normal, no requiere intervención</li>
+        <li><strong>4-6 puntos:</strong> Depresión moderada, requiere maniobras de reanimación</li>
+        <li><strong>0-3 puntos:</strong> Depresión severa, requiere reanimación inmediata</li>
+    </ul>
+    <p><strong>Seguimiento:</strong> Los recién nacidos con APGAR < 7 a los 5 minutos requieren seguimiento pediátrico especializado.</p>
+</div>
+{% endblock %}

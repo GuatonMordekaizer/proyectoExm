@@ -1,0 +1,5 @@
+# Logs
+*.log
+*.log.*
+app.log
+errors.log

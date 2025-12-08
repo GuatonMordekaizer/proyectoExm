@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sistema de Alertas - Hospital HHM{% endblock %}
+
+{% block extra_css %}
+<style>
+    .alert-card {
+        border-left: 4px solid;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .alert-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .alert-card.nivel-CRITICA {
+        border-left-color: #dc3545;
+        background: linear-gradient(to right, #fff5f5, #ffffff);
+    }
+    .alert-card.nivel-ALTA {
+        border-left-color: #fd7e14;
+        background: linear-gradient(to right, #fff8f0, #ffffff);
+    }
+    .alert-card.nivel-MEDIA {
+        border-left-color: #ffc107;
+        background: linear-gradient(to right, #fffbf0, #ffffff);
+    }
+    .alert-card.nivel-BAJA {
+        border-left-color: #0dcaf0;
+        background: linear-gradient(to right, #f0f9ff, #ffffff);
+    }
+    .stat-card {
+        border-radius: 10px;
+        padding: 20px;
+    }
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="mb-0"><i class="bi bi-exclamation-triangle-fill text-danger"></i> Sistema de Alertas</h2>
+            <p class="text-muted">Monitoreo de situaciones críticas</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'dashboard_alertas' %}" class="btn btn-outline-primary">
+                <i class="bi bi-bar-chart"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm stat-card bg-danger text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">{{ stats.criticas }}</h3>
+                        <small>Alertas Críticas</small>
+                    </div>
+                    <i class="bi bi-exclamation-triangle-fill" style="font-size: 2rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm stat-card bg-warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">{{ stats.activas }}</h3>
+                        <small>Activas</small>
+                    </div>
+                    <i class="bi bi-bell-fill" style="font-size: 2rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm stat-card bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">{{ stats.en_atencion }}</h3>
+                        <small>En Atención</small>
+                    </div>
+                    <i class="bi bi-person-check-fill" style="font-size: 2rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm stat-card bg-success text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">{{ stats.hoy }}</h3>
+                        <small>Hoy</small>
+                    </div>
+                    <i class="bi bi-calendar-check-fill" style="font-size: 2rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Estado</label>
+                    <select name="estado" class="form-select">
+                        <option value="">Todos</option>
+                        {% for value, label in estados %}
+                        <option value="{{ value }}" {% if estado_filtro == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Tipo</label>
+                    <select name="tipo" class="form-select">
+                        <option value="">Todos</option>
+                        {% for value, label in tipos_alerta %}
+                        <option value="{{ value }}" {% if tipo_filtro == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Nivel de Urgencia</label>
+                    <select name="nivel" class="form-select">
+                        <option value="">Todos</option>
+                        {% for value, label in niveles_urgencia %}
+                        <option value="{{ value }}" {% if nivel_filtro == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Alertas -->
+    <div class="row">
+        {% for alerta in alertas %}
+        <div class="col-12 mb-3">
+            <div class="card alert-card border-0 shadow-sm nivel-{{ alerta.nivel_urgencia }} {% if alerta.es_critica and alerta.estado == 'ACTIVA' %}pulse-animation{% endif %}">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-start mb-2">
+                                <span class="badge bg-{{ alerta.css_class }} me-2">{{ alerta.get_nivel_urgencia_display }}</span>
+                                <span class="badge bg-secondary me-2">{{ alerta.get_tipo_display }}</span>
+                                <span class="badge bg-{% if alerta.estado == 'ACTIVA' %}danger{% elif alerta.estado == 'EN_ATENCION' %}warning{% else %}success{% endif %}">
+                                    {{ alerta.get_estado_display }}
+                                </span>
+                            </div>
+                            <h5 class="mb-2">{{ alerta.titulo }}</h5>
+                            <p class="text-muted mb-2">{{ alerta.descripcion }}</p>
+                            
+                            {% if alerta.paciente %}
+                            <div class="text-muted small">
+                                <i class="bi bi-person"></i> Paciente: <strong>{{ alerta.paciente.nombre_completo }}</strong> - {{ alerta.paciente.rut }}
+                            </div>
+                            {% endif %}
+                            
+                            {% if alerta.recien_nacido %}
+                            <div class="text-muted small">
+                                <i class="bi bi-baby"></i> Recién Nacido - Parto #{{ alerta.parto.id }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-clock"></i> {{ alerta.fecha_hora_alerta|date:"d/m/Y H:i" }}
+                                </small>
+                            </div>
+                            
+                            {% if alerta.estado == 'ACTIVA' and alerta.tiempo_sin_atencion > 0 %}
+                            <div class="mb-2">
+                                <span class="badge bg-danger">
+                                    ⏰ {{ alerta.tiempo_sin_atencion }} min sin atención
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="btn-group">
+                                <a href="{% url 'detalle_alerta' alerta.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> Ver
+                                </a>
+                                {% if alerta.estado == 'ACTIVA' %}
+                                <a href="{% url 'atender_alerta' alerta.id %}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-person-check"></i> Atender
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3 text-muted">No hay alertas con los filtros seleccionados</h5>
+                    <p class="text-muted mb-0">Todas las situaciones están bajo control</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+// Auto-refresh cada 30 segundos si hay alertas activas
+{% if stats.activas > 0 %}
+setTimeout(function() {
+    location.reload();
+}, 30000);
+{% endif %}
+</script>
+{% endblock %}

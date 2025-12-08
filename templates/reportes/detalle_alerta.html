@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Alerta #{{ alerta.id }} - Hospital HHM{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'listado_alertas' %}">Alertas</a></li>
+                    <li class="breadcrumb-item active">Alerta #{{ alerta.id }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <!-- Información Principal -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-{{ alerta.css_class }} text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> {{ alerta.titulo }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Tipo:</strong>
+                            <span class="badge bg-secondary">{{ alerta.get_tipo_display }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Nivel de Urgencia:</strong>
+                            <span class="badge bg-{{ alerta.css_class }}">{{ alerta.get_nivel_urgencia_display }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Estado:</strong>
+                            <span class="badge bg-{% if alerta.estado == 'ACTIVA' %}danger{% elif alerta.estado == 'EN_ATENCION' %}warning{% else %}success{% endif %}">
+                                {{ alerta.get_estado_display }}
+                            </span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Fecha y Hora:</strong>
+                            {{ alerta.fecha_hora_alerta|date:"d/m/Y H:i" }}
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5 class="mb-3">Descripción</h5>
+                    <p class="lead">{{ alerta.descripcion }}</p>
+                    
+                    {% if alerta.observaciones %}
+                    <hr>
+                    <h5 class="mb-3">Observaciones</h5>
+                    <p>{{ alerta.observaciones }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Datos del Paciente/RN -->
+            {% if alerta.paciente %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-fill"></i> Información del Paciente</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Nombre:</strong> {{ alerta.paciente.nombre_completo }}<br>
+                            <strong>RUT:</strong> {{ alerta.paciente.rut }}<br>
+                            <strong>Edad:</strong> {{ alerta.paciente.edad }} años
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Previsión:</strong> {{ alerta.paciente.get_prevision_display }}<br>
+                            <strong>Teléfono:</strong> {{ alerta.paciente.telefono|default:"No registrado" }}
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'detalle_paciente' alerta.paciente.id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye"></i> Ver Ficha Completa
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if alerta.recien_nacido %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-baby-fill"></i> Información del Recién Nacido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Parto:</strong> #{{ alerta.parto.id }}<br>
+                            <strong>Fecha Parto:</strong> {{ alerta.parto.fecha_parto|date:"d/m/Y" }}<br>
+                            <strong>Tipo:</strong> {{ alerta.parto.get_tipo_parto_display }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Peso:</strong> {{ alerta.recien_nacido.peso_gramos }}g<br>
+                            <strong>APGAR 1 min:</strong> {{ alerta.recien_nacido.apgar_1_min }}<br>
+                            <strong>APGAR 5 min:</strong> {{ alerta.recien_nacido.apgar_5_min }}
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'detalle_recien_nacido' alerta.recien_nacido.id %}" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-eye"></i> Ver Datos Completos RN
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Resolver Alerta -->
+            {% if alerta.estado in 'ACTIVA,EN_ATENCION' %}
+            <div class="card border-0 shadow-sm border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-check-circle"></i> Resolver Alerta</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'resolver_alerta' alerta.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Observaciones de Resolución</label>
+                            <textarea name="observaciones" class="form-control" rows="4" placeholder="Describa las acciones tomadas y el resultado..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Marcar como Resuelta
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Timeline -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Línea de Tiempo</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <span class="badge bg-danger rounded-circle p-2">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <strong>Alerta Generada</strong>
+                                    <div class="text-muted small">{{ alerta.fecha_hora_alerta|date:"d/m/Y H:i:s" }}</div>
+                                    {% if alerta.usuario_genera %}
+                                    <div class="text-muted small">Por: {{ alerta.usuario_genera.get_full_name }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+
+                        {% if alerta.fecha_hora_atencion %}
+                        <li class="mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <span class="badge bg-warning rounded-circle p-2">
+                                        <i class="bi bi-person-check"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <strong>En Atención</strong>
+                                    <div class="text-muted small">{{ alerta.fecha_hora_atencion|date:"d/m/Y H:i:s" }}</div>
+                                    {% if alerta.usuario_atiende %}
+                                    <div class="text-muted small">Por: {{ alerta.usuario_atiende.get_full_name }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        {% endif %}
+
+                        {% if alerta.fecha_hora_resolucion %}
+                        <li class="mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <span class="badge bg-success rounded-circle p-2">
+                                        <i class="bi bi-check-circle"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <strong>Resuelta</strong>
+                                    <div class="text-muted small">{{ alerta.fecha_hora_resolucion|date:"d/m/Y H:i:s" }}</div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                    {% if alerta.estado == 'ACTIVA' %}
+                    <div class="alert alert-danger">
+                        <strong>⏰ Tiempo sin atención:</strong><br>
+                        {{ alerta.tiempo_sin_atencion }} minutos
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-gear"></i> Acciones</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if alerta.estado == 'ACTIVA' %}
+                        <a href="{% url 'atender_alerta' alerta.id %}" class="btn btn-warning">
+                            <i class="bi bi-person-check"></i> Marcar En Atención
+                        </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'listado_alertas' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver al Listado
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

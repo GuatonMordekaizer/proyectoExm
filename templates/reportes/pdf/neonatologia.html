@@ -1,0 +1,125 @@
+{% extends 'reportes/pdf/base_pdf.html' %}
+
+{% block title %}Indicadores Neonatales{% endblock %}
+{% block header_title %}Estadísticas de Neonatología{% endblock %}
+
+{% block content %}
+<div class="section-title">Resumen General</div>
+
+<div class="stats-grid">
+    <div class="stat-item">
+        <div class="stat-value">{{ total_rn }}</div>
+        <div class="stat-label">Total RN</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ peso_promedio|floatformat:0 }}g</div>
+        <div class="stat-label">Peso Promedio</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ apgar_1_promedio|floatformat:1 }}</div>
+        <div class="stat-label">APGAR 1min</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ apgar_5_promedio|floatformat:1 }}</div>
+        <div class="stat-label">APGAR 5min</div>
+    </div>
+</div>
+
+<div class="section-title">Distribución de Peso al Nacer</div>
+
+<table>
+    <tr>
+        <th>Clasificación</th>
+        <th style="text-align: center;">Cantidad</th>
+        <th style="text-align: center;">Porcentaje</th>
+        <th>Rango</th>
+    </tr>
+    <tr>
+        <td><span class="badge badge-danger">Muy Bajo Peso</span></td>
+        <td style="text-align: center;">{{ rn_muy_bajo_peso }}</td>
+        <td style="text-align: center;">{{ porcentaje_muy_bajo_peso }}%</td>
+        <td>&lt; 1500g</td>
+    </tr>
+    <tr>
+        <td><span class="badge badge-warning">Bajo Peso</span></td>
+        <td style="text-align: center;">{{ rn_bajo_peso }}</td>
+        <td style="text-align: center;">{{ porcentaje_bajo_peso }}%</td>
+        <td>1500g - 2499g</td>
+    </tr>
+    <tr>
+        <td><span class="badge badge-success">Peso Normal</span></td>
+        <td style="text-align: center;">{{ rn_peso_normal }}</td>
+        <td style="text-align: center;">{{ porcentaje_peso_normal }}%</td>
+        <td>2500g - 3999g</td>
+    </tr>
+    <tr>
+        <td><span class="badge badge-info">Macrosómico</span></td>
+        <td style="text-align: center;">{{ rn_macrosomico }}</td>
+        <td style="text-align: center;">{{ porcentaje_macrosomico }}%</td>
+        <td>≥ 4000g</td>
+    </tr>
+</table>
+
+<div class="section-title">Puntaje APGAR</div>
+
+<table>
+    <tr>
+        <th>Clasificación</th>
+        <th style="text-align: center;">APGAR 1 min</th>
+        <th style="text-align: center;">APGAR 5 min</th>
+        <th>Estado</th>
+    </tr>
+    <tr>
+        <td><span class="badge badge-danger">Crítico</span></td>
+        <td style="text-align: center;">{{ apgar_1_critico }}</td>
+        <td style="text-align: center;">{{ apgar_5_critico }}</td>
+        <td>0-3 puntos</td>
+    </tr>
+    <tr>
+        <td><span class="badge badge-warning">Moderadamente deprimido</span></td>
+        <td style="text-align: center;">{{ apgar_1_moderado }}</td>
+        <td style="text-align: center;">{{ apgar_5_moderado }}</td>
+        <td>4-6 puntos</td>
+    </tr>
+    <tr>
+        <td><span class="badge badge-success">Normal</span></td>
+        <td style="text-align: center;">{{ apgar_1_normal }}</td>
+        <td style="text-align: center;">{{ apgar_5_normal }}</td>
+        <td>7-10 puntos</td>
+    </tr>
+</table>
+
+<div class="section-title">Reanimación Neonatal</div>
+
+<div class="stats-grid">
+    <div class="stat-item">
+        <div class="stat-value">{{ rn_reanimacion }}</div>
+        <div class="stat-label">Requirió Reanimación</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ porcentaje_reanimacion }}%</div>
+        <div class="stat-label">Tasa de Reanimación</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ rn_no_reanimacion }}</div>
+        <div class="stat-label">Sin Reanimación</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ porcentaje_no_reanimacion }}%</div>
+        <div class="stat-label">Sin Intervención</div>
+    </div>
+</div>
+
+<div class="section-title">Observaciones Clínicas</div>
+
+<div class="info-box">
+    <p><strong>Peso promedio:</strong> {{ peso_promedio|floatformat:0 }}g (Rango normal: 2500-4000g)</p>
+    <p><strong>APGAR a los 5 minutos:</strong> {{ apgar_5_promedio|floatformat:1 }} puntos (Óptimo: ≥ 7)</p>
+    {% if porcentaje_bajo_peso|floatformat:0|add:"0" > 10 %}
+    <p><strong>Alerta:</strong> La tasa de bajo peso al nacer ({{ porcentaje_bajo_peso }}%) supera el 10% esperado.</p>
+    {% endif %}
+    {% if porcentaje_reanimacion|floatformat:0|add:"0" > 10 %}
+    <p><strong>Atención:</strong> La tasa de reanimación neonatal ({{ porcentaje_reanimacion }}%) es elevada.</p>
+    {% endif %}
+</div>
+{% endblock %}

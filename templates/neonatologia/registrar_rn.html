@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Recién Nacido{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="bi bi-baby"></i> Registrar Recién Nacido</h2>
+            <p class="text-muted">
+                Madre: <strong>{{ parto.paciente.nombre_completo }}</strong> | Fecha Parto: {{ parto.fecha_parto }}
+            </p>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    Por favor corrija los errores en el formulario.
+                    {{ form.errors }}
+                </div>
+                {% endif %}
+
+                <!-- Datos Básicos -->
+                <h5 class="card-title text-primary border-bottom pb-2 mb-3">Datos Básicos y Antropometría</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label">Sexo</label>
+                        {{ form.sexo }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Peso (g)</label>
+                        {{ form.peso_gramos }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Talla (cm)</label>
+                        {{ form.talla_cm }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Circunferencia Craneana (cm)</label>
+                        {{ form.circunferencia_craneana_cm }}
+                    </div>
+                </div>
+
+                <!-- APGAR -->
+                <h5 class="card-title text-success border-bottom pb-2 mb-3">
+                    <i class="bi bi-heart-pulse"></i> Evaluación APGAR
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#apgarInfoModal">
+                        <i class="bi bi-info-circle"></i> ¿Qué es APGAR?
+                    </button>
+                </h5>
+                <div class="row g-3 mb-4 bg-light p-3 rounded">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">
+                            APGAR 1 min <span class="text-danger">*</span>
+                            <i class="bi bi-question-circle-fill text-info" data-bs-toggle="tooltip" 
+                               title="Evaluación al minuto de nacer. Valora: Apariencia, Pulso, Gesticulación, Actividad, Respiración"></i>
+                        </label>
+                        {{ form.apgar_1_min }}
+                        <small class="form-text text-muted">0-10 puntos</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">
+                            APGAR 5 min <span class="text-danger">*</span>
+                            <i class="bi bi-question-circle-fill text-info" data-bs-toggle="tooltip" 
+                               title="Evaluación a los 5 minutos. Indica adaptación neonatal"></i>
+                        </label>
+                        {{ form.apgar_5_min }}
+                        <small class="form-text text-muted">7-10: Normal | 4-6: Moderado | 0-3: Crítico</small>
+                        <div class="form-text text-danger" id="apgar5Help" style="display:none;">
+                            <i class="bi bi-exclamation-triangle"></i> Crítico (< 7)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            APGAR 10 min
+                            <i class="bi bi-question-circle-fill text-info" data-bs-toggle="tooltip" 
+                               title="Opcional. Se registra si APGAR 5 min fue < 7"></i>
+                        </label>
+                        {{ form.apgar_10_min }}
+                        <small class="form-text text-muted">Opcional</small>
+                    </div>
+                </div>
+
+                    <!-- Reanimación y Destino -->
+                    <h5 class="card-title text-warning border-bottom pb-2 mb-3">Reanimación y Destino</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label">Estado al Nacer <span class="text-danger">*</span></label>
+                            {{ form.estado_al_nacer }}
+                        </div>
+                        <div class="col-md-8 mb-2">
+                            <div class="form-check mt-4">
+                                {{ form.reanimacion_requerida }}
+                                <label class="form-check-label fw-bold">Reanimación Requerida</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo Reanimación</label>
+                            {{ form.tipo_reanimacion }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Destino</label>
+                            {{ form.destino }}
+                        </div>
+                    </div>
+
+                    <!-- Malformaciones -->
+                    <h5 class="card-title text-danger border-bottom pb-2 mb-3">Malformaciones</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12 mb-2">
+                            <div class="form-check">
+                                {{ form.malformaciones }}
+                                <label class="form-check-label text-danger">Presenta Malformaciones</label>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Descripción Malformaciones</label>
+                            {{ form.descripcion_malformaciones }}
+                        </div>
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="mb-4">
+                        <label class="form-label">Observaciones Generales</label>
+                        {{ form.observaciones }}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle"></i> Finalizar Registro
+                        </button>
+                    </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Información APGAR -->
+<div class="modal fade" id="apgarInfoModal" tabindex="-1" aria-labelledby="apgarInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="apgarInfoModalLabel">
+                    <i class="bi bi-heart-pulse"></i> Test de APGAR - Evaluación Neonatal
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <strong><i class="bi bi-info-circle"></i> ¿Qué es el Test de APGAR?</strong>
+                    <p class="mb-0">Sistema de puntuación desarrollado por la Dra. Virginia Apgar en 1952 para evaluar la condición física del recién nacido y determinar si necesita atención médica inmediata.</p>
+                </div>
+
+                <h6 class="mt-3 mb-3"><i class="bi bi-clipboard-check"></i> Parámetros Evaluados (0-2 puntos cada uno):</h6>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="20%">Signo</th>
+                                <th width="27%">0 puntos</th>
+                                <th width="27%">1 punto</th>
+                                <th width="26%">2 puntos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>A</strong>pariencia (color)</td>
+                                <td>Azul o pálido</td>
+                                <td>Cuerpo rosado, extremidades azules</td>
+                                <td>Completamente rosado</td>
+                            </tr>
+                            <tr>
+                                <td><strong>P</strong>ulso (frecuencia cardíaca)</td>
+                                <td>Ausente</td>
+                                <td>< 100 lpm</td>
+                                <td>> 100 lpm</td>
+                            </tr>
+                            <tr>
+                                <td><strong>G</strong>esticulación (reflejos)</td>
+                                <td>Sin respuesta</td>
+                                <td>Mueca/llanto débil</td>
+                                <td>Llanto vigoroso</td>
+                            </tr>
+                            <tr>
+                                <td><strong>A</strong>ctividad (tono muscular)</td>
+                                <td>Flácido</td>
+                                <td>Flexión leve</td>
+                                <td>Movimiento activo</td>
+                            </tr>
+                            <tr>
+                                <td><strong>R</strong>espiración</td>
+                                <td>Ausente</td>
+                                <td>Lenta, irregular</td>
+                                <td>Buena, llanto</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h6 class="mt-4 mb-3"><i class="bi bi-graph-up"></i> Interpretación del Puntaje:</h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <h3 class="text-success">7-10</h3>
+                                <p class="mb-0"><strong>Normal</strong><br><small>Buena adaptación</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-warning">
+                            <div class="card-body text-center">
+                                <h3 class="text-warning">4-6</h3>
+                                <p class="mb-0"><strong>Moderado</strong><br><small>Requiere observación</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-danger">
+                            <div class="card-body text-center">
+                                <h3 class="text-danger">0-3</h3>
+                                <p class="mb-0"><strong>Crítico</strong><br><small>Requiere reanimación</small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning mt-3">
+                    <strong><i class="bi bi-clock-history"></i> Tiempos de Evaluación:</strong>
+                    <ul class="mb-0">
+                        <li><strong>1 minuto:</strong> Evalúa tolerancia al proceso del parto</li>
+                        <li><strong>5 minutos:</strong> Indica respuesta a la reanimación (si fue necesaria)</li>
+                        <li><strong>10 minutos:</strong> Solo si APGAR 5 min < 7 (evalúa recuperación)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple script to show warning for low APGAR
+    document.addEventListener('DOMContentLoaded', function () {
+        const apgar5 = document.querySelector('[name="apgar_5_min"]');
+        const warning = document.getElementById('apgar5Help');
+
+        if (apgar5) {
+            apgar5.addEventListener('input', function () {
+                if (this.value && this.value < 7) {
+                    warning.style.display = 'block';
+                } else {
+                    warning.style.display = 'none';
+                }
+            });
+        }
+    });
+
+    // Activar tooltips de Bootstrap
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

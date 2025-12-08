@@ -1,0 +1,56 @@
+{% extends 'reportes/pdf/base_pdf.html' %}
+
+{% block title %}Partos del Período{% endblock %}
+{% block header_title %}Registro de Partos del Período{% endblock %}
+
+{% block content %}
+<div class="section-title">Resumen del Período</div>
+
+<div class="stats-grid">
+    <div class="stat-item">
+        <div class="stat-value">{{ partos|length }}</div>
+        <div class="stat-label">Total Partos</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ partos_vaginales }}</div>
+        <div class="stat-label">Partos Vaginales</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ cesareas }}</div>
+        <div class="stat-label">Cesáreas</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ tasa_cesarea }}%</div>
+        <div class="stat-label">Tasa de Cesáreas</div>
+    </div>
+</div>
+
+<div class="section-title">Detalle de Partos</div>
+
+<table>
+    <tr>
+        <th>Fecha</th>
+        <th>Paciente</th>
+        <th>RUT</th>
+        <th>Tipo de Parto</th>
+        <th style="text-align: center;">Grupo Robson</th>
+        <th>Médico</th>
+    </tr>
+    {% for parto in partos %}
+    <tr>
+        <td>{{ parto.fecha_parto|date:"d/m/Y" }}</td>
+        <td>{{ parto.paciente.nombre }} {{ parto.paciente.apellido }}</td>
+        <td>{{ parto.paciente.rut }}</td>
+        <td>
+            {% if parto.tipo_parto == 'cesarea' %}
+            <span class="badge badge-danger">Cesárea</span>
+            {% else %}
+            <span class="badge badge-success">Vaginal</span>
+            {% endif %}
+        </td>
+        <td style="text-align: center;">{{ parto.grupo_robson }}</td>
+        <td>{{ parto.medico_responsable.nombre }} {{ parto.medico_responsable.apellido }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

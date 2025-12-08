@@ -1,0 +1,129 @@
+{% extends 'reportes/pdf/base_pdf.html' %}
+
+{% block title %}Alertas del Sistema{% endblock %}
+{% block header_title %}Reporte de Alertas y Notificaciones{% endblock %}
+
+{% block content %}
+<div class="section-title">Resumen General</div>
+
+<div class="stats-grid">
+    <div class="stat-item">
+        <div class="stat-value">{{ total_alertas }}</div>
+        <div class="stat-label">Total Alertas</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ alertas_criticas }}</div>
+        <div class="stat-label">Críticas</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ alertas_pendientes }}</div>
+        <div class="stat-label">Pendientes</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ alertas_resueltas }}</div>
+        <div class="stat-label">Resueltas</div>
+    </div>
+</div>
+
+<div class="section-title">Alertas por Tipo</div>
+
+<table>
+    <tr>
+        <th>Tipo de Alerta</th>
+        <th style="text-align: center;">Cantidad</th>
+        <th style="text-align: center;">Porcentaje</th>
+        <th style="text-align: center;">Promedio Críticas</th>
+    </tr>
+    {% for tipo in alertas_por_tipo %}
+    <tr>
+        <td>{{ tipo.tipo }}</td>
+        <td style="text-align: center;">{{ tipo.total }}</td>
+        <td style="text-align: center;">{{ tipo.porcentaje }}%</td>
+        <td style="text-align: center;">
+            {% if tipo.criticas > 0 %}
+            <span class="badge badge-danger">{{ tipo.criticas }}</span>
+            {% else %}
+            <span class="badge badge-success">0</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="section-title">Alertas por Nivel de Prioridad</div>
+
+<table>
+    <tr>
+        <th>Nivel</th>
+        <th style="text-align: center;">Cantidad</th>
+        <th style="text-align: center;">% del Total</th>
+        <th style="text-align: center;">Pendientes</th>
+        <th style="text-align: center;">Resueltas</th>
+    </tr>
+    {% for nivel in alertas_por_nivel %}
+    <tr>
+        <td>
+            {% if nivel.nivel == 'critico' %}
+            <span class="badge badge-danger">Crítico</span>
+            {% elif nivel.nivel == 'alto' %}
+            <span class="badge badge-warning">Alto</span>
+            {% elif nivel.nivel == 'medio' %}
+            <span class="badge badge-info">Medio</span>
+            {% else %}
+            <span class="badge badge-success">Bajo</span>
+            {% endif %}
+        </td>
+        <td style="text-align: center;">{{ nivel.total }}</td>
+        <td style="text-align: center;">{{ nivel.porcentaje }}%</td>
+        <td style="text-align: center;">{{ nivel.pendientes }}</td>
+        <td style="text-align: center;">{{ nivel.resueltas }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="section-title">Estado de Alertas</div>
+
+<table>
+    <tr>
+        <th>Estado</th>
+        <th style="text-align: center;">Cantidad</th>
+        <th style="text-align: center;">Porcentaje</th>
+    </tr>
+    {% for estado in alertas_por_estado %}
+    <tr>
+        <td>
+            {% if estado.estado == 'pendiente' %}
+            <span class="badge badge-warning">Pendiente</span>
+            {% elif estado.estado == 'en_proceso' %}
+            <span class="badge badge-info">En Proceso</span>
+            {% elif estado.estado == 'resuelta' %}
+            <span class="badge badge-success">Resuelta</span>
+            {% else %}
+            {{ estado.estado }}
+            {% endif %}
+        </td>
+        <td style="text-align: center;">{{ estado.total }}</td>
+        <td style="text-align: center;">{{ estado.porcentaje }}%</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="section-title">Observaciones</div>
+
+<div class="info-box">
+    <p><strong>Tiempo promedio de resolución:</strong> 
+        {% if tiempo_promedio_resolucion %}
+        {{ tiempo_promedio_resolucion }} horas
+        {% else %}
+        No disponible
+        {% endif %}
+    </p>
+    <p><strong>Tasa de resolución:</strong> {{ tasa_resolucion }}%</p>
+    {% if alertas_criticas > 0 %}
+    <p><strong>Atención:</strong> Existen {{ alertas_criticas }} alertas de nivel crítico que requieren atención inmediata.</p>
+    {% endif %}
+    {% if alertas_pendientes > 0 %}
+    <p><strong>Pendientes:</strong> {{ alertas_pendientes }} alertas pendientes de gestión.</p>
+    {% endif %}
+</div>
+{% endblock %}

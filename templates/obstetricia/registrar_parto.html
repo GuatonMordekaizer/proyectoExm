@@ -1,0 +1,885 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Parto{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .wizard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    /* Stepper moderno */
+    .stepper-wrapper {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        position: relative;
+        padding: 0 20px;
+    }
+    
+    .stepper-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 30px;
+        left: 50px;
+        right: 50px;
+        height: 3px;
+        background: linear-gradient(to right, #e0e0e0 0%, #e0e0e0 100%);
+        z-index: 0;
+    }
+    
+    .stepper-item {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        z-index: 1;
+    }
+    
+    .step-counter {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #e0e0e0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #9e9e9e;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .step-counter i {
+        font-size: 1.5rem;
+    }
+    
+    .stepper-item.active .step-counter {
+        background: var(--primary-gradient);
+        border-color: #667eea;
+        color: white;
+        transform: scale(1.1);
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .stepper-item.completed .step-counter {
+        background: var(--success-gradient);
+        border-color: #38ef7d;
+        color: white;
+    }
+    
+    .step-name {
+        margin-top: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #9e9e9e;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .stepper-item.active .step-name {
+        color: #667eea;
+        font-weight: 700;
+    }
+    
+    .stepper-item.completed .step-name {
+        color: #11998e;
+    }
+    
+    /* Secciones del formulario */
+    .form-section {
+        display: none;
+        animation: fadeIn 0.5s ease;
+    }
+    
+    .form-section.active {
+        display: block;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Cards modernas */
+    .modern-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .modern-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+    }
+    
+    .modern-card-header {
+        padding: 1.5rem;
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+    }
+    
+    .modern-card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .modern-card-body {
+        padding: 2rem;
+        background: white;
+    }
+    
+    /* Inputs modernos */
+    .form-control, .form-select {
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    }
+    
+    /* Campos con errores */
+    .form-control.is-invalid, .form-select.is-invalid {
+        border-color: #f5576c;
+        background-color: #fff5f7;
+        animation: shake 0.5s ease;
+    }
+    
+    .form-control.is-invalid:focus, .form-select.is-invalid:focus {
+        border-color: #f5576c;
+        box-shadow: 0 0 0 0.2rem rgba(245, 87, 108, 0.25);
+    }
+    
+    .text-danger {
+        color: #f5576c !important;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .text-danger::before {
+        content: '⚠';
+        font-size: 1rem;
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #424242;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Checkboxes modernos */
+    .form-check-input {
+        width: 1.5rem;
+        height: 1.5rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .form-check-input:checked {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+    
+    .form-check-label {
+        margin-left: 0.5rem;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    
+    /* Botones modernos */
+    .btn-modern {
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    
+    .btn-primary-modern {
+        background: var(--primary-gradient);
+        color: white;
+    }
+    
+    .btn-secondary-modern {
+        background: linear-gradient(135deg, #757f9a 0%, #d7dde8 100%);
+        color: #424242;
+    }
+    
+    .btn-success-modern {
+        background: var(--success-gradient);
+        color: white;
+    }
+    
+    /* Badge moderno */
+    .required-badge {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #f5576c;
+        border-radius: 50%;
+        margin-left: 4px;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+    
+    /* Header del paciente */
+    .patient-header {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .patient-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    /* Progress bar */
+    .progress-modern {
+        height: 8px;
+        border-radius: 10px;
+        background: #f0f0f0;
+        margin-bottom: 2rem;
+        overflow: visible;
+    }
+    
+    .progress-bar-modern {
+        height: 100%;
+        background: var(--success-gradient);
+        border-radius: 10px;
+        transition: width 0.5s ease;
+        position: relative;
+    }
+    
+    .progress-bar-modern::after {
+        content: '';
+        position: absolute;
+        right: -4px;
+        top: -2px;
+        width: 12px;
+        height: 12px;
+        background: #38ef7d;
+        border-radius: 50%;
+        box-shadow: 0 2px 10px rgba(56, 239, 125, 0.5);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wizard-container">
+    <!-- Header del Paciente -->
+    <div class="patient-header">
+        <div class="d-flex align-items-center gap-3">
+            <div class="patient-avatar">
+                {{ paciente.nombre.0 }}{{ paciente.apellido_paterno.0 }}
+            </div>
+            <div class="flex-grow-1">
+                <h4 class="mb-1">{{ paciente.nombre_completo }}</h4>
+                <div class="d-flex gap-3 text-muted">
+                    <span><i class="bi bi-card-text"></i> {{ paciente.rut }}</span>
+                    <span><i class="bi bi-calendar"></i> {{ paciente.edad }} años</span>
+                    <span><i class="bi bi-hospital"></i> {{ paciente.get_prevision_display }}</span>
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'detalle_paciente' paciente.pk %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="progress-modern">
+        <div class="progress-bar-modern" id="progressBar" style="width: 25%"></div>
+    </div>
+
+    <!-- Stepper -->
+    <div class="stepper-wrapper">
+        <div class="stepper-item active" data-step="1">
+            <div class="step-counter">
+                <i class="bi bi-calendar-event"></i>
+            </div>
+            <span class="step-name">Datos del Parto</span>
+        </div>
+        <div class="stepper-item" data-step="2">
+            <div class="step-counter">
+                <i class="bi bi-person-heart"></i>
+            </div>
+            <span class="step-name">Estado Materno</span>
+        </div>
+        <div class="stepper-item" data-step="3">
+            <div class="step-counter">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <span class="step-name">Complicaciones</span>
+        </div>
+        <div class="stepper-item" data-step="4">
+            <div class="step-counter">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <span class="step-name">Resumen</span>
+        </div>
+    </div>
+
+    <form method="post" id="formParto">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Por favor corrija los errores:</h5>
+            <ul class="mb-0">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li><strong>{{ field }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+
+        <!-- Sección 1: Datos del Parto -->
+        <div class="form-section active" data-section="1">
+            <div class="modern-card">
+                <div class="modern-card-header">
+                    <h5><i class="bi bi-calendar-event"></i> Datos del Parto</h5>
+                </div>
+                <div class="modern-card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Control Prenatal <span class="required-badge"></span></label>
+                        {{ form.control_prenatal }}
+                        {% if form.control_prenatal.errors %}
+                            <div class="text-danger"><small>{{ form.control_prenatal.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Fecha Parto <span class="required-badge"></span></label>
+                        {{ form.fecha_parto }}
+                        {% if form.fecha_parto.errors %}
+                            <div class="text-danger"><small>{{ form.fecha_parto.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Hora Parto <span class="required-badge"></span></label>
+                        {{ form.hora_parto }}
+                        {% if form.hora_parto.errors %}
+                            <div class="text-danger"><small>{{ form.hora_parto.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Edad Gestacional (Sem) <span class="required-badge"></span></label>
+                        {{ form.edad_gestacional_semanas }}
+                        <small class="form-text text-muted">20-45 semanas</small>
+                        {% if form.edad_gestacional_semanas.errors %}
+                            <div class="text-danger"><small>{{ form.edad_gestacional_semanas.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Edad Gestacional (Días)</label>
+                        {{ form.edad_gestacional_dias }}
+                        <small class="form-text text-muted">0-6 días</small>
+                        {% if form.edad_gestacional_dias.errors %}
+                            <div class="text-danger"><small>{{ form.edad_gestacional_dias.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tipo de Parto <span class="required-badge"></span></label>
+                        {{ form.tipo_parto }}
+                        {% if form.tipo_parto.errors %}
+                            <div class="text-danger"><small>{{ form.tipo_parto.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Presentación <span class="required-badge"></span></label>
+                        {{ form.presentacion }}
+                        {% if form.presentacion.errors %}
+                            <div class="text-danger"><small>{{ form.presentacion.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Inicio Trabajo Parto <span class="required-badge"></span></label>
+                        {{ form.inicio_trabajo_parto }}
+                        {% if form.inicio_trabajo_parto.errors %}
+                            <div class="text-danger"><small>{{ form.inicio_trabajo_parto.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Lugar Atención <span class="required-badge"></span></label>
+                        {{ form.lugar_atencion }}
+                        {% if form.lugar_atencion.errors %}
+                            <div class="text-danger"><small>{{ form.lugar_atencion.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Alumbramiento <span class="required-badge"></span></label>
+                        {{ form.alumbramiento }}
+                        {% if form.alumbramiento.errors %}
+                            <div class="text-danger"><small>{{ form.alumbramiento.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="button" class="btn btn-modern btn-primary-modern" onclick="nextStep()">
+                        Siguiente <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Sección 2: Antecedentes y Estado Materno -->
+        <div class="form-section" data-section="2">
+            <div class="modern-card">
+                <div class="modern-card-header" style="background: var(--info-gradient);">
+                    <h5><i class="bi bi-person-heart"></i> Antecedentes y Estado Materno</h5>
+                </div>
+                <div class="modern-card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Paridad:</label>
+                        <div class="form-check form-check-inline ms-3">
+                            {{ form.primigesta }}
+                            <label class="form-check-label">Primigesta</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            {{ form.multigesta }}
+                            <label class="form-check-label">Multigesta</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            {{ form.cicatriz_uterina }}
+                            <label class="form-check-label">Cicatriz Uterina</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Rotura Membranas <span class="required-badge"></span></label>
+                        {{ form.rotura_membranas }}
+                        {% if form.rotura_membranas.errors %}
+                            <div class="text-danger"><small>{{ form.rotura_membranas.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Líquido Amniótico <span class="required-badge"></span></label>
+                        {{ form.liquido_amniotico }}
+                        {% if form.liquido_amniotico.errors %}
+                            <div class="text-danger"><small>{{ form.liquido_amniotico.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Anestesia <span class="required-badge"></span></label>
+                        {{ form.anestesia }}
+                        {% if form.anestesia.errors %}
+                            <div class="text-danger"><small>{{ form.anestesia.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-modern btn-secondary-modern" onclick="prevStep()">
+                        <i class="bi bi-arrow-left"></i> Anterior
+                    </button>
+                    <button type="button" class="btn btn-modern btn-primary-modern" onclick="nextStep()">
+                        Siguiente <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Sección 3: Complicaciones y Procedimientos -->
+        <div class="form-section" data-section="3">
+            <div class="modern-card">
+                <div class="modern-card-header" style="background: var(--warning-gradient);">
+                    <h5><i class="bi bi-exclamation-triangle"></i> Complicaciones y Procedimientos</h5>
+                </div>
+                <div class="modern-card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Complicaciones:</label>
+                        <div class="form-check form-check-inline ms-3">
+                            {{ form.hemorragia_postparto }}
+                            <label class="form-check-label text-danger fw-bold">Hemorragia Postparto</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            {{ form.episiotomia }}
+                            <label class="form-check-label">Episiotomía</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Volumen Hemorragia (ml)</label>
+                        {{ form.hemorragia_ml }}
+                        <small class="form-text text-muted">Pérdida sanguínea estimada</small>
+                        {% if form.hemorragia_ml.errors %}
+                            <div class="text-danger"><small>{{ form.hemorragia_ml.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Desgarro Perineal <span class="required-badge"></span></label>
+                        {{ form.desgarro_perineal }}
+                        {% if form.desgarro_perineal.errors %}
+                            <div class="text-danger"><small>{{ form.desgarro_perineal.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Indicación Cesárea</label>
+                        {{ form.indicacion_cesarea }}
+                        <small class="form-text text-muted">Solo si aplica</small>
+                        {% if form.indicacion_cesarea.errors %}
+                            <div class="text-danger"><small>{{ form.indicacion_cesarea.errors.0 }}</small></div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-modern btn-secondary-modern" onclick="prevStep()">
+                        <i class="bi bi-arrow-left"></i> Anterior
+                    </button>
+                    <button type="button" class="btn btn-modern btn-primary-modern" onclick="nextStep()">
+                        Siguiente <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Sección 4: Observaciones y Resumen -->
+        <div class="form-section" data-section="4">
+            <div class="modern-card">
+                <div class="modern-card-header" style="background: var(--success-gradient);">
+                    <h5><i class="bi bi-chat-left-text"></i> Observaciones y Confirmación</h5>
+                </div>
+                <div class="modern-card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Observaciones Adicionales</label>
+                            {{ form.observaciones }}
+                            <small class="form-text text-muted">Notas importantes sobre el parto, complicaciones adicionales, etc.</small>
+                            {% if form.observaciones.errors %}
+                                <div class="text-danger"><small>{{ form.observaciones.errors.0 }}</small></div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-4">
+                        <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Información Importante</h6>
+                        <p class="mb-0">Al guardar este formulario, se registrará el parto y será redirigido al formulario de registro del recién nacido.</p>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-modern btn-secondary-modern" onclick="prevStep()">
+                            <i class="bi bi-arrow-left"></i> Anterior
+                        </button>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'detalle_paciente' paciente.pk %}" class="btn btn-modern btn-secondary-modern">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-modern btn-success-modern" id="btnSubmit">
+                                <i class="bi bi-save"></i> Guardar y Continuar a RN
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 4;
+
+// Marcar campos con errores en rojo
+document.addEventListener('DOMContentLoaded', function() {
+    // Buscar todos los campos con errores del servidor
+    document.querySelectorAll('.text-danger').forEach(function(errorMsg) {
+        const parent = errorMsg.closest('.col-md-3, .col-md-4, .col-md-6, .col-12');
+        if (parent) {
+            const input = parent.querySelector('.form-control, .form-select');
+            if (input) {
+                input.classList.add('is-invalid');
+            }
+        }
+    });
+    
+    // Agregar evento a todos los inputs para quitar error al llenar
+    document.querySelectorAll('.form-control, .form-select').forEach(function(input) {
+        input.addEventListener('input', function() {
+            if (this.value && this.value.trim() !== '') {
+                this.classList.remove('is-invalid');
+                const errorDiv = this.parentElement.querySelector('.text-danger');
+                if (errorDiv && !errorDiv.textContent.includes('Este campo es obligatorio')) {
+                    errorDiv.remove();
+                }
+            }
+        });
+        
+        input.addEventListener('change', function() {
+            if (this.value && this.value.trim() !== '') {
+                this.classList.remove('is-invalid');
+                const errorDiv = this.parentElement.querySelector('.text-danger');
+                if (errorDiv && !errorDiv.textContent.includes('Este campo es obligatorio')) {
+                    errorDiv.remove();
+                }
+            }
+        });
+    });
+    
+    // Si hay errores del servidor, ir a la primera sección con errores
+    const firstError = document.querySelector('.is-invalid');
+    if (firstError) {
+        const section = firstError.closest('.form-section');
+        if (section) {
+            const sectionNum = parseInt(section.dataset.section);
+            currentStep = sectionNum;
+            updateStepper();
+            
+            // Scroll al primer campo con error
+            setTimeout(() => {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }, 300);
+        }
+    }
+});
+
+function updateStepper() {
+    // Actualizar stepper items
+    document.querySelectorAll('.stepper-item').forEach((item, index) => {
+        const step = index + 1;
+        if (step < currentStep) {
+            item.classList.add('completed');
+            item.classList.remove('active');
+        } else if (step === currentStep) {
+            item.classList.add('active');
+            item.classList.remove('completed');
+        } else {
+            item.classList.remove('active', 'completed');
+        }
+    });
+
+    // Actualizar secciones
+    document.querySelectorAll('.form-section').forEach((section, index) => {
+        const sectionNumber = parseInt(section.dataset.section);
+        if (sectionNumber === currentStep) {
+            section.classList.add('active');
+        } else {
+            section.classList.remove('active');
+        }
+    });
+
+    // Actualizar barra de progreso
+    const progress = (currentStep / totalSteps) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+
+    // Scroll al inicio
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextStep() {
+    if (currentStep < totalSteps) {
+        currentStep++;
+        updateStepper();
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        updateStepper();
+    }
+}
+
+// Validación del formulario antes de enviar
+document.getElementById('formParto').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Lista de campos obligatorios
+    const camposObligatorios = [
+        { name: 'fecha_parto', label: 'Fecha Parto', step: 1 },
+        { name: 'hora_parto', label: 'Hora Parto', step: 1 },
+        { name: 'edad_gestacional_semanas', label: 'Edad Gestacional (Semanas)', step: 1 },
+        { name: 'tipo_parto', label: 'Tipo de Parto', step: 1 },
+        { name: 'presentacion', label: 'Presentación', step: 1 },
+        { name: 'inicio_trabajo_parto', label: 'Inicio Trabajo Parto', step: 1 },
+        { name: 'lugar_atencion', label: 'Lugar Atención', step: 1 },
+        { name: 'alumbramiento', label: 'Alumbramiento', step: 1 },
+        { name: 'rotura_membranas', label: 'Rotura Membranas', step: 2 },
+        { name: 'liquido_amniotico', label: 'Líquido Amniótico', step: 2 },
+        { name: 'anestesia', label: 'Anestesia', step: 2 },
+        { name: 'desgarro_perineal', label: 'Desgarro Perineal', step: 3 }
+    ];
+    
+    let camposVacios = [];
+    let primerCampoVacio = null;
+    let stepConError = null;
+    
+    // Validar campos obligatorios
+    camposObligatorios.forEach(campo => {
+        const input = document.querySelector(`[name="${campo.name}"]`);
+        if (input) {
+            const valor = input.value.trim();
+            if (!valor || valor === '') {
+                camposVacios.push(campo.label);
+                input.classList.add('is-invalid');
+                
+                if (!primerCampoVacio) {
+                    primerCampoVacio = input;
+                    stepConError = campo.step;
+                }
+                
+                // Agregar mensaje de error si no existe
+                let errorDiv = input.parentElement.querySelector('.text-danger');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'text-danger';
+                    errorDiv.innerHTML = '<small>Este campo es obligatorio</small>';
+                    input.parentElement.appendChild(errorDiv);
+                }
+            } else {
+                input.classList.remove('is-invalid');
+                const errorDiv = input.parentElement.querySelector('.text-danger');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+            }
+        }
+    });
+    
+    // Validar edad gestacional
+    const edadSemanas = document.querySelector('[name="edad_gestacional_semanas"]').value;
+    if (edadSemanas && (edadSemanas < 20 || edadSemanas > 45)) {
+        camposVacios.push('Edad Gestacional (debe estar entre 20-45 semanas)');
+        document.querySelector('[name="edad_gestacional_semanas"]').classList.add('is-invalid');
+        if (!primerCampoVacio) {
+            primerCampoVacio = document.querySelector('[name="edad_gestacional_semanas"]');
+            stepConError = 1;
+        }
+    }
+    
+    // Si hay campos vacíos, mostrar alerta y no enviar
+    if (camposVacios.length > 0) {
+        // Crear alerta moderna
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.style.maxWidth = '600px';
+        alertDiv.innerHTML = `
+            <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Campos Obligatorios Incompletos</h5>
+            <p class="mb-2">Por favor complete los siguientes campos:</p>
+            <ul class="mb-2">
+                ${camposVacios.slice(0, 5).map(campo => `<li>${campo}</li>`).join('')}
+                ${camposVacios.length > 5 ? `<li>...y ${camposVacios.length - 5} más</li>` : ''}
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        
+        // Ir al paso con error
+        if (stepConError) {
+            currentStep = stepConError;
+            updateStepper();
+        }
+        
+        // Scroll y focus al primer campo vacío
+        if (primerCampoVacio) {
+            setTimeout(() => {
+                primerCampoVacio.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                primerCampoVacio.focus();
+            }, 300);
+        }
+        
+        // Auto-cerrar alerta después de 5 segundos
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+        
+        return false;
+    }
+    
+    // Si todo está bien, enviar el formulario
+    const btnSubmit = document.getElementById('btnSubmit');
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+    
+    // Enviar el formulario
+    this.submit();
+});
+
+// Navegación con teclado (opcional)
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' && currentStep < totalSteps && !e.target.matches('textarea')) {
+        nextStep();
+    } else if (e.key === 'ArrowLeft' && currentStep > 1 && !e.target.matches('textarea')) {
+        prevStep();
+    }
+});
+</script>
+{% endblock %}
