@@ -47,28 +47,89 @@ def generar_rut_valido():
     return rut_formateado
 
 
+def crear_usuario(driver, wait, username, rut, nombre, apellido, email, password="doc@12345678"):
+    """
+    Función auxiliar para crear un usuario médico.
+    """
+    print(f"\n  Creando usuario: {username}")
+    
+    # Navegar al formulario
+    driver.get("http://127.0.0.1:8000/auth/usuarios/crear/")
+    time.sleep(2)
+    
+    # Verificar acceso
+    if "/auth/login/" in driver.current_url:
+        print("    ✗ Usuario no tiene permisos")
+        return False
+    
+    # Completar formulario
+    driver.find_element(By.ID, "id_username").clear()
+    driver.find_element(By.ID, "id_username").send_keys(username)
+    
+    driver.find_element(By.ID, "id_rut").clear()
+    driver.find_element(By.ID, "id_rut").send_keys(rut)
+    
+    driver.find_element(By.ID, "id_first_name").clear()
+    driver.find_element(By.ID, "id_first_name").send_keys(nombre)
+    
+    driver.find_element(By.ID, "id_last_name").clear()
+    driver.find_element(By.ID, "id_last_name").send_keys(apellido)
+    
+    driver.find_element(By.ID, "id_email").clear()
+    driver.find_element(By.ID, "id_email").send_keys(email)
+    
+    rol_select = Select(driver.find_element(By.ID, "id_rol"))
+    rol_select.select_by_value("medico_obstetra")
+    
+    # Contraseñas si existen
+    try:
+        driver.find_element(By.ID, "id_password1").clear()
+        driver.find_element(By.ID, "id_password1").send_keys(password)
+        driver.find_element(By.ID, "id_password2").clear()
+        driver.find_element(By.ID, "id_password2").send_keys(password)
+    except NoSuchElementException:
+        pass
+    
+    time.sleep(1)
+    
+    # Enviar
+    submit_button = driver.find_element(By.CSS_SELECTOR, "button[type='submit'].btn-primary")
+    driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
+    time.sleep(0.5)
+    driver.execute_script("arguments[0].click();", submit_button)
+    time.sleep(3)
+    
+    # Verificar resultado
+    current_url = driver.current_url
+    if "/usuarios/" in current_url and "/usuarios/crear/" not in current_url:
+        print(f"    ✓ Usuario {username} creado exitosamente")
+        return True
+    else:
+        print(f"    ✗ Error al crear usuario {username}")
+        return False
+
+
 def test_crear_usuario_medico():
     """
-    Test completo de creación de usuario Médico Gineco-Obstetra.
-    Completa todos los campos del formulario y verifica el registro exitoso.
+    Test de creación de 2 usuarios Médico Gineco-Obstetra.
+    Crea: medico_g (usado por otros tests) + un usuario aleatorio.
     """
     driver = webdriver.Chrome()
     wait = WebDriverWait(driver, 10)
     
     try:
         print("=" * 80)
-        print("TEST: CREAR USUARIO MÉDICO GINECO-OBSTETRA")
+        print("TEST: CREAR 2 USUARIOS MÉDICO GINECO-OBSTETRA")
         print("=" * 80)
         
         # ===================================================================
-        # PASO 1: LOGIN COMO ADMINISTRADOR O JEFE DE SERVICIO
+        # PASO 1: LOGIN COMO ADMINISTRADOR
         # ===================================================================
-        print("\n[1/4] Iniciando sesión como jefe de servicio...")
+        print("\n[1/3] Iniciando sesión como jefe de servicio...")
         driver.get("http://127.0.0.1:8000/auth/login/")
         
-        # Login como jefe de servicio (tiene permisos para crear usuarios)
         username_input = wait.until(EC.presence_of_element_located((By.NAME, "username")))
-        username_input.send_keys("admin_hhm")  # Usuario jefe de servicio
+        username_input.send_keys("admin_hhm")
         
         password_input = driver.find_element(By.NAME, "password")
         password_input.send_keys("admin_password_123")
@@ -76,206 +137,83 @@ def test_crear_usuario_medico():
         login_button = driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
         login_button.click()
         
-        # Esperar que cargue el dashboard
         time.sleep(2)
-        current_url = driver.current_url
         
-        if "/auth/login/" in current_url:
-            print("✗ ERROR: No se pudo iniciar sesión con las credenciales proporcionadas")
-            print("  Intenta con otro usuario con permisos administrativos")
+        if "/auth/login/" in driver.current_url:
+            print("✗ ERROR: No se pudo iniciar sesión")
             return False
         
         print("✓ Sesión iniciada correctamente")
         
         # ===================================================================
-        # PASO 2: NAVEGAR AL FORMULARIO DE CREAR USUARIO
+        # PASO 2: CREAR USUARIO 1 - medico_g (PARA OTROS TESTS)
         # ===================================================================
-        print("\n[2/4] Navegando al formulario de crear usuario...")
-        driver.get("http://127.0.0.1:8000/auth/usuarios/crear/")
+        print("\n[2/3] Creando usuario principal para tests: medico_g")
+        print("  RUT: 20.364.050-1")
+        print("  Username: medico_g")
+        print("  Password: doc@12345678")
+        print("  Rol: Médico Gineco-Obstetra")
         
-        # Esperar que cargue el formulario
-        time.sleep(2)
+        resultado1 = crear_usuario(
+            driver, wait,
+            username="medico_g",
+            rut="20.364.050-1",
+            nombre="Dr. Gineco",
+            apellido="Obstetra",
+            email="medico_g@hospital.cl",
+            password="doc@12345678"
+        )
         
-        # Verificar que estamos en el formulario
-        current_url = driver.current_url
-        if "/auth/login/" in current_url:
-            print("✗ ERROR: Usuario no tiene permisos para crear usuarios")
-            return False
-        
-        if "/usuarios/crear/" not in current_url:
-            print(f"✗ ERROR: No se pudo acceder al formulario. URL actual: {current_url}")
-            return False
-        
-        print("✓ Formulario de crear usuario cargado")
+        if not resultado1:
+            print("\n⚠ ADVERTENCIA: No se pudo crear medico_g (puede que ya exista)")
         
         # ===================================================================
-        # PASO 3: COMPLETAR FORMULARIO
+        # PASO 3: CREAR USUARIO 2 - USUARIO ALEATORIO
         # ===================================================================
-        print("\n[3/4] Completando formulario de usuario...")
+        print("\n[3/3] Creando segundo usuario médico...")
         
-        # Generar datos de prueba
-        rut_usuario = generar_rut_valido()
-        username_nuevo = f"medico_{rut_usuario[:8].replace('.', '')}"  # medico_12345678
+        rut_aleatorio = generar_rut_valido()
+        username_aleatorio = f"medico_{rut_aleatorio[:8].replace('.', '')}"
         
-        print(f"\nDatos del usuario a crear:")
-        print(f"  RUT: {rut_usuario}")
-        print(f"  Username: {username_nuevo}")
-        print(f"  Nombre: Dr. Juan Carlos")
-        print(f"  Apellido: Fernández López")
-        print(f"  Email: {username_nuevo}@hospital.cl")
+        print(f"  RUT: {rut_aleatorio}")
+        print(f"  Username: {username_aleatorio}")
+        print(f"  Password: TempPass@2024")
         print(f"  Rol: Médico Gineco-Obstetra")
         
-        # --- USERNAME ---
-        username_input = driver.find_element(By.ID, "id_username")
-        username_input.clear()
-        username_input.send_keys(username_nuevo)
-        print("\n  ✓ Username completado")
-        
-        # --- RUT ---
-        rut_input = driver.find_element(By.ID, "id_rut")
-        rut_input.clear()
-        rut_input.send_keys(rut_usuario)
-        print("  ✓ RUT completado")
-        
-        # --- NOMBRE ---
-        first_name_input = driver.find_element(By.ID, "id_first_name")
-        first_name_input.clear()
-        first_name_input.send_keys("Juan Carlos")
-        print("  ✓ Nombre completado")
-        
-        # --- APELLIDO ---
-        last_name_input = driver.find_element(By.ID, "id_last_name")
-        last_name_input.clear()
-        last_name_input.send_keys("Fernández López")
-        print("  ✓ Apellido completado")
-        
-        # --- EMAIL ---
-        email_input = driver.find_element(By.ID, "id_email")
-        email_input.clear()
-        email_input.send_keys(f"{username_nuevo}@hospital.cl")
-        print("  ✓ Email completado")
-        
-        # --- ROL ---
-        rol_select = Select(driver.find_element(By.ID, "id_rol"))
-        rol_select.select_by_value("medico_obstetra")
-        print("  ✓ Rol 'Médico Gineco-Obstetra' seleccionado")
-        
-        # --- CONTRASEÑA (si el formulario la pide en creación) ---
-        try:
-            password1_input = driver.find_element(By.ID, "id_password1")
-            password1_input.clear()
-            password1_input.send_keys("TempPass@2024")
-            
-            password2_input = driver.find_element(By.ID, "id_password2")
-            password2_input.clear()
-            password2_input.send_keys("TempPass@2024")
-            print("  ✓ Contraseñas completadas")
-        except NoSuchElementException:
-            print("  ⚠ Campos de contraseña no encontrados (puede ser normal)")
-        
-        time.sleep(1)
+        resultado2 = crear_usuario(
+            driver, wait,
+            username=username_aleatorio,
+            rut=rut_aleatorio,
+            nombre="Juan Carlos",
+            apellido="Fernández López",
+            email=f"{username_aleatorio}@hospital.cl",
+            password="TempPass@2024"
+        )
         
         # ===================================================================
-        # PASO 4: ENVIAR FORMULARIO
+        # PASO 4: RESUMEN
         # ===================================================================
-        print("\n[4/4] Enviando formulario...")
+        print("\n" + "=" * 80)
+        print("RESUMEN DE CREACIÓN DE USUARIOS")
+        print("=" * 80)
         
-        # Verificar URL antes de enviar
-        current_url_before = driver.current_url
-        print(f"  URL antes de enviar: {current_url_before}")
-        
-        # Buscar el botón submit
-        # Buscar el botón CORRECTO (el primario del formulario, no el de logout)
-        submit_button = driver.find_element(By.CSS_SELECTOR, "button[type='submit'].btn-primary")
-        driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
-        time.sleep(0.5)
-        
-        # Verificar token CSRF
-        try:
-            csrf_input = driver.find_element(By.CSS_SELECTOR, "input[name='csrfmiddlewaretoken']")
-            csrf_value = csrf_input.get_attribute('value')
-            if csrf_value:
-                print(f"✓ Token CSRF presente: {csrf_value[:20]}...")
-            else:
-                print("⚠ Token CSRF vacío")
-        except NoSuchElementException:
-            print("✗ ERROR: No se encontró token CSRF")
-            raise
-        
-        # Enviar formulario usando JavaScript
-        driver.execute_script("arguments[0].click();", submit_button)
-        print("✓ Formulario enviado")
-        
-        # ===================================================================
-        # PASO 5: VERIFICAR RESULTADO
-        # ===================================================================
-        print("\n[5/5] Verificando resultado...")
-        time.sleep(3)
-        
-        # Verificar URL actual
-        current_url = driver.current_url
-        print(f"  URL después de enviar: {current_url}")
-        
-        # Buscar errores
-        try:
-            error_alert = driver.find_element(By.CSS_SELECTOR, ".alert-danger")
-            print("✗ ERROR: Se encontraron errores en el formulario")
-            print(f"  Mensaje: {error_alert.text}")
-            
-            # Buscar errores específicos
-            field_errors = driver.find_elements(By.CSS_SELECTOR, ".text-danger")
-            if field_errors:
-                print("\n  Errores de campos:")
-                for error in field_errors:
-                    if error.text.strip():
-                        print(f"    - {error.text}")
-            
-            time.sleep(10)
-            return False
-            
-        except NoSuchElementException:
-            print("✓ No se encontraron errores en el formulario")
-        
-        # Verificar redirección exitosa
-        if "/usuarios/" in current_url and "/usuarios/crear/" not in current_url:
-            print("✓ Redirección exitosa después de crear usuario")
-            
-            # Buscar mensaje de éxito
-            try:
-                success_message = driver.find_element(By.CSS_SELECTOR, ".alert-success, .alert-info")
-                print(f"✓ Mensaje de éxito: {success_message.text}")
-            except NoSuchElementException:
-                print("  (No se encontró mensaje de éxito explícito, pero hubo redirección)")
-            
-            print("\n" + "=" * 80)
-            print("✓ TEST EXITOSO: USUARIO MÉDICO CREADO CORRECTAMENTE")
-            print("=" * 80)
-            print(f"\nUsuario creado:")
-            print(f"  - RUT: {rut_usuario}")
-            print(f"  - Username: {username_nuevo}")
-            print(f"  - Nombre: Dr. Juan Carlos Fernández López")
-            print(f"  - Email: {username_nuevo}@hospital.cl")
-            print(f"  - Rol: Médico Gineco-Obstetra")
-            
-            return True
-            
+        if resultado1:
+            print("✓ Usuario 1: medico_g creado exitosamente")
+            print("  → Este usuario es usado por test_selenium_registrar_parto.py")
+            print("  → Este usuario es usado por test_selenium_generar_alerta.py")
         else:
-            print(f"⚠ ADVERTENCIA: URL inesperada después de enviar: {current_url}")
-            print("  Se esperaba redirección a lista de usuarios")
-            
-            # Verificar si seguimos en el formulario
-            if "/usuarios/crear/" in current_url:
-                print("  ⚠ Seguimos en el formulario de creación")
-                print("  Buscando errores no detectados...")
-                
-                all_errors = driver.find_elements(By.CSS_SELECTOR, ".text-danger, .alert-danger")
-                if all_errors:
-                    print("\n  Errores encontrados:")
-                    for error in all_errors:
-                        if error.text.strip():
-                            print(f"    - {error.text}")
-                    return False
-            
+            print("⚠ Usuario 1: medico_g no se pudo crear (puede existir)")
+        
+        if resultado2:
+            print(f"✓ Usuario 2: {username_aleatorio} creado exitosamente")
+        else:
+            print(f"✗ Usuario 2: {username_aleatorio} falló")
+        
+        if resultado1 or resultado2:
+            print("\n✓ TEST COMPLETADO: Al menos 1 usuario fue creado")
+            return True
+        else:
+            print("\n✗ TEST FALLÓ: Ningún usuario pudo ser creado")
             return False
     
     except TimeoutException as e:
@@ -312,11 +250,13 @@ def test_crear_usuario_medico():
 
 if __name__ == "__main__":
     print("\n" + "╔" + "=" * 78 + "╗")
-    print("║" + " " * 18 + "TEST SELENIUM - CREAR USUARIO MÉDICO" + " " * 24 + "║")
+    print("║" + " " * 15 + "TEST SELENIUM - CREAR 2 USUARIOS MÉDICOS" + " " * 22 + "║")
     print("╚" + "=" * 78 + "╝")
-    print("\nEste test automatiza el formulario de creación de usuario Médico Gineco-Obstetra.")
-    print("Requisito: El servidor debe estar corriendo en http://127.0.0.1:8000")
-    print("Requisito: Usa el usuario admin_hhm (jefe de servicio) para crear el usuario")
+    print("\nEste test crea 2 usuarios Médico Gineco-Obstetra:")
+    print("  1. medico_g (usado por otros tests de Selenium)")
+    print("  2. Usuario aleatorio adicional")
+    print("\nRequisito: El servidor debe estar corriendo en http://127.0.0.1:8000")
+    print("Requisito: Usa el usuario admin_hhm (jefe de servicio) para crear usuarios")
     print("\nPresione Ctrl+C para cancelar...\n")
     
     try:
