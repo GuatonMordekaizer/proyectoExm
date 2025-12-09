@@ -7,7 +7,28 @@
 
 Sistema de información web para la gestión digital de partos y neonatología, diseñado para reemplazar el registro manual en Excel y cumplir con la normativa chilena vigente.
 
-## 🚀 Funcionalidades Principales
+## 📋 Documentación del Proyecto
+
+### Informe Técnico Completo
+La documentación completa del proyecto se encuentra en:
+```
+docs/informe/
+├── 01-PORTADA.md                    # Portada académica del proyecto
+├── 02-CONTENIDO.md                  # Índice y contenido del informe
+├── 03-INTRODUCCION.md               # Introducción y contexto del proyecto
+├── 04-PLANTEAMIENTO.md              # Planteamiento del problema y objetivos
+├── 05-ANALISIS.md                   # Análisis del problema y requerimientos
+├── 06-ENFOQUE_METODOLOGICO.md       # Metodología SCRUM aplicada
+├── 07-ENFOQUE_TECNICO_1.md          # Arquitectura y tecnologías (con interfaces)
+├── 07-ENFOQUE_TECNICO_2.md          # Tecnologias, diagramas UML del sistema
+├── 07-ENFOQUE_TECNICO_3.md          # Implementación y desarrollo
+├── 07-ENFOQUE_TECNICO_4.md          # Despliegue y infraestructura
+├── 08-CRONOGRAMA.md                 # Cronograma y planificación
+├── 09-RESULTADOS.md                 # Resultados obtenidos y métricas
+└── 10-REFERENCIAS.md                # Referencias bibliográficas
+```
+
+## Funcionalidades Principales
 
 ### 1. Gestión de Pacientes
 - Búsqueda rápida por RUT o nombre.
@@ -42,7 +63,7 @@ Sistema de información web para la gestión digital de partos y neonatología, 
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 hospital_hhm/
@@ -74,7 +95,7 @@ hospital_hhm/
 └── requirements.txt     # Dependencias Python
 ```
 
-## 🛠️ Instalación y Configuración
+## Instalación y Configuración
 
 ### Prerrequisitos
 - Python 3.11+
@@ -131,7 +152,7 @@ hospital_hhm/
    python manage.py migrate
    ```
    
-   📚 Ver documentación detallada en: `ACTUALIZACION_MODELOS.md`
+   Ver documentación detallada en: `ACTUALIZACION_MODELOS.md`
 
 6. **Crear superusuario**
    ```bash
@@ -146,7 +167,7 @@ hospital_hhm/
 
 ---
 
-## 📖 Guía de Uso Rápida
+## Guía de Uso Rápida
 
 ### 1. Iniciar Sesión
 - Use su RUT (ej: 12.345.678-9) o nombre de usuario.
@@ -166,7 +187,7 @@ hospital_hhm/
 
 ---
 
-## 🧪 Testing
+## Testing
 
 El proyecto incluye tests unitarios para validar la lógica médica crítica.
 
@@ -183,7 +204,7 @@ python manage.py test apps.neonatologia
 
 ---
 
-## 📄 Licencia y Normativa
+## Licencia y Normativa
 
 Desarrollado para el Hospital Clínico Herminda Martín.
 Cumple con:

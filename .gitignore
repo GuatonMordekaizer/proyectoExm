@@ -31,8 +31,8 @@ local_settings.py
 htmlcov/
 .coverage
 .pytest_cache/
-*.png
 debug_*.html
+docs/extra/supplementary/
 
 # OS
 .DS_Store
