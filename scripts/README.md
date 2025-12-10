@@ -2,7 +2,7 @@
 
 Esta carpeta contiene scripts útiles para administración y pruebas del sistema.
 
-## 📁 Estructura
+## Estructura
 
 ```
 scripts/
@@ -12,7 +12,7 @@ scripts/
 └── ejecutar_pruebas_selenium.sh    # Ejecutar pruebas automatizadas (Linux/Mac)
 ```
 
-## 🔧 Migraciones (`migraciones/`)
+## Migraciones (`migraciones/`)
 
 ### `aplicar_migraciones.bat` / `aplicar_migraciones.sh`
 Aplica todas las migraciones pendientes a la base de datos.
@@ -34,7 +34,7 @@ Verifica y aplica migraciones con confirmación.
 python scripts/migraciones/aplicar_migraciones_verificar.py
 ```
 
-## 🛠️ Utilidades (`utilidades/`)
+## Utilidades (`utilidades/`)
 
 ### `create_superuser.py`
 Crea un superusuario de forma automatizada.
@@ -102,7 +102,7 @@ scripts\ejecutar_pruebas_selenium.bat
 
 Ver `tests/README_SELENIUM.md` para más detalles.
 
-## 📝 Notas
+## Notas
 
 - Todos los scripts Python deben ejecutarse desde la raíz del proyecto
 - Asegúrate de activar el entorno virtual antes de ejecutar los scripts

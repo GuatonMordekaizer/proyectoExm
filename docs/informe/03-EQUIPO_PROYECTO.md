@@ -10,7 +10,7 @@ El equipo está conformado por 4 profesionales especializados en desarrollo de s
 
 ## **1.2 ROLES INDIVIDUALES Y CALIFICACIONES**
 
-### **🎯 ARIEL RODRÍGUEZ - PROJECT MANAGER & BUSINESS ANALYST**
+### **ARIEL RODRÍGUEZ - PROJECT MANAGER & BUSINESS ANALYST**
 
 **Rol en el Proyecto:** Gestión integral del proyecto, análisis de contexto hospitalario y definición metodológica
 
@@ -29,7 +29,7 @@ El equipo está conformado por 4 profesionales especializados en desarrollo de s
 
 ---
 
-### **🏗️ CRISTIAN DUARTE - SOFTWARE ARCHITECT & BACKEND DEVELOPER**
+### **CRISTIAN DUARTE - SOFTWARE ARCHITECT & BACKEND DEVELOPER**
 
 **Rol en el Proyecto:** Arquitectura del sistema, diseño de base de datos y desarrollo backend
 
@@ -54,7 +54,7 @@ El equipo está conformado por 4 profesionales especializados en desarrollo de s
 
 ---
 
-### **🎨 JUBRINI ALBORNOZ - UX/UI DESIGNER & FRONTEND DEVELOPER**
+### **JUBRINI ALBORNOZ - UX/UI DESIGNER & FRONTEND DEVELOPER**
 
 **Rol en el Proyecto:** Experiencia de usuario, prototipado de interfaces y modelo de datos
 
@@ -80,7 +80,7 @@ El equipo está conformado por 4 profesionales especializados en desarrollo de s
 
 ---
 
-### **🔐 GUILLERMO NAVARRETE - SECURITY ENGINEER & QA LEAD**
+### **GUILLERMO NAVARRETE - SECURITY ENGINEER & QA LEAD**
 
 **Rol en el Proyecto:** Seguridad del sistema, plan de pruebas e integración de componentes
 

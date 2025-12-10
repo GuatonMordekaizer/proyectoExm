@@ -425,7 +425,7 @@ RESUMEN = {
 
 if __name__ == "__main__":
     print("\n" + "="*60)
-    print("RESUMEN DE MODELOS ACTUALIZADOS")
+    print("RESUMEN DE MODELOS")
     print("="*60)
     print(f"\n📊 Estadísticas:")
     print(f"   • Modelos actualizados: {RESUMEN['Modelos actualizados']}")

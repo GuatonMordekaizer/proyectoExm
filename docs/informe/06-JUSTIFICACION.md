@@ -152,12 +152,12 @@ El sistema manual basado en Excel presenta limitaciones significativas que afect
 - **Tiempo de implementación:** Proceso largo de configuración
 
 #### **¿Por qué desarrollo propio con Django?**
-✅ **Costo optimizado:** Inversión razonable vs. alternativas comerciales  
-✅ **Personalización completa:** Adaptado a workflows específicos del hospital  
-✅ **Control total:** Hospital mantiene propiedad intelectual del sistema  
-✅ **Tecnología probada:** Django es una plataforma madura y confiable  
-✅ **Escalabilidad:** Arquitectura que permite crecimiento futuro  
-✅ **Comunidad:** Amplio soporte técnico disponible  
+**Costo optimizado:** Inversión razonable vs. alternativas comerciales  
+**Personalización completa:** Adaptado a workflows específicos del hospital  
+**Control total:** Hospital mantiene propiedad intelectual del sistema  
+**Tecnología probada:** Django es una plataforma madura y confiable  
+**Escalabilidad:** Arquitectura que permite crecimiento futuro  
+**Comunidad:** Amplio soporte técnico disponible  
 
 ---
 

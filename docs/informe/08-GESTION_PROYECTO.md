@@ -37,11 +37,11 @@ La metodología **Scrum** ha sido seleccionada tras un análisis comparativo con
 
 #### **Ventajas Específicas de Scrum para Este Proyecto:**
 
-✅ **Entrega temprana de valor**: MVP operativo en 3 meses vs 12 meses en Cascada
-✅ **Adaptabilidad**: 15+ ajustes durante desarrollo sin retrasos por cambios en requisitos REM ministerial
-✅ **Calidad integrada**: Testing continuo con Definition of Done clara, logrando 0 defectos críticos en producción
-✅ **Feedback constante**: Retrospectivas permiten ajustar interfaz según usabilidad real del personal médico
-✅ **Gestión de riesgos**: Identificación y mitigación de riesgos en cada Sprint, especialmente en seguridad (ISO 27001/27799)
+**Entrega temprana de valor**: MVP operativo en 3 meses vs 12 meses en Cascada
+**Adaptabilidad**: 15+ ajustes durante desarrollo sin retrasos por cambios en requisitos REM ministerial
+**Calidad integrada**: Testing continuo con Definition of Done clara, logrando 0 defectos críticos en producción
+**Feedback constante**: Retrospectivas permiten ajustar interfaz según usabilidad real del personal médico
+**Gestión de riesgos**: Identificación y mitigación de riesgos en cada Sprint, especialmente en seguridad (ISO 27001/27799)
 
 ### **6.1.2 RESUMEN METODOLÓGICO**
 
@@ -211,13 +211,13 @@ El proyecto se desarrollará siguiendo metodología SCRUM con sprints de 2 seman
 
 | Hito | Día | Semana | Fecha Estimada | Responsable | Descripción |
 |------|-----|--------|----------------|-------------|-------------|
-| 🎯 **Kick-off Proyecto** | 0 | 1 | 6 ene 2026 | Equipo de Desarrollo | Inicio del proyecto de implementación |
-| ✅ **Arquitectura Definida** | 14 | 2 | 20 ene 2026 | Cristian Duarte | Arquitectura Django + PostgreSQL funcionando |
-| ✅ **Modelos Implementados** | 28 | 4 | 3 feb 2026 | Cristian Duarte | Modelos Parto y RN completos en BD |
-| ✅ **Formularios Funcionales** | 56 | 8 | 3 mar 2026 | Development Team | Sistema registro partos operativo |
-| ✅ **Seguridad Completa** | 84 | 12 | 31 mar 2026 | Guillermo Navarrete | RBAC + Auditoría + Cifrado implementados |
-| ✅ **Testing QA Aprobado** | 98 | 14 | 14 abr 2026 | Guillermo Navarrete | Todas las pruebas pasadas (>80% cobertura) |
-| 🎯 **MVP EN PRODUCCIÓN** | 112 | 16 | 28 abr 2026 | Equipo de Desarrollo | Sistema en producción con 10 usuarios piloto |
+| **Kick-off Proyecto** | 0 | 1 | 6 ene 2026 | Equipo de Desarrollo | Inicio del proyecto de implementación |
+| **Arquitectura Definida** | 14 | 2 | 20 ene 2026 | Cristian Duarte | Arquitectura Django + PostgreSQL funcionando |
+| **Modelos Implementados** | 28 | 4 | 3 feb 2026 | Cristian Duarte | Modelos Parto y RN completos en BD |
+| **Formularios Funcionales** | 56 | 8 | 3 mar 2026 | Development Team | Sistema registro partos operativo |
+| **Seguridad Completa** | 84 | 12 | 31 mar 2026 | Guillermo Navarrete | RBAC + Auditoría + Cifrado implementados |
+| **Testing QA Aprobado** | 98 | 14 | 14 abr 2026 | Guillermo Navarrete | Todas las pruebas pasadas (>80% cobertura) |
+| **MVP EN PRODUCCIÓN** | 112 | 16 | 28 abr 2026 | Equipo de Desarrollo | Sistema en producción con 10 usuarios piloto |
 
 ### **6.3.3 DISTRIBUCIÓN DE TRABAJO POR PROFESIONAL**
 

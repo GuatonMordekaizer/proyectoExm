@@ -43,7 +43,7 @@
 ### **LOGO DEL PROYECTO**
 
 <p align="center">
-  <img src="../../static/img/logo.png" width="200" />
+  <img src="../img/logo.png" width="200" />
 </p>
 ---
 

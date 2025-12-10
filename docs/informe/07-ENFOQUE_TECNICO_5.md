@@ -42,10 +42,10 @@ Se implementaron 4 tests Selenium que validan:
 ## **5.15 RESULTADOS OBTENIDOS**
 
 ### **5.15.1 Funcionalidades Validadas**
-✅ **Sistema de Pacientes**: Registro, búsqueda y gestión  
-✅ **Sistema Obstétrico**: Formularios de parto completos  
-✅ **Sistema Neonatal**: Evaluaciones APGAR y alertas  
-✅ **Sistema de Administración**: Control de acceso y auditoría  
+**Sistema de Pacientes**: Registro, búsqueda y gestión  
+**Sistema Obstétrico**: Formularios de parto completos  
+**Sistema Neonatal**: Evaluaciones APGAR y alertas  
+**Sistema de Administración**: Control de acceso y auditoría  
 
 ### **5.15.2 Métricas de Performance**
 - Tiempo de respuesta: < 2 segundos operaciones críticas
@@ -150,16 +150,16 @@ Se implementaron 4 tests Selenium que validan:
 El Sistema de Gestión Obstétrica ha cumplido exitosamente todos los objetivos establecidos:
 
 **Éxitos Técnicos**:
-- ✅ Arquitectura robusta Django 4.2 + PostgreSQL
-- ✅ Interfaces usables con Bootstrap 5
-- ✅ Testing automatizado validado
-- ✅ Seguridad y auditoría implementadas
+- Arquitectura robusta Django 4.2 + PostgreSQL
+- Interfaces usables con Bootstrap 5
+- Testing automatizado validado
+- Seguridad y auditoría implementadas
 
 **Éxitos Médicos**:
-- ✅ Digitalización completa de procesos obstétricos
-- ✅ Sistema de alertas críticas funcional
-- ✅ Cumplimiento normativo chileno
-- ✅ Mejora significativa en eficiencia hospitalaria
+- Digitalización completa de procesos obstétricos
+- Sistema de alertas críticas funcional
+- Cumplimiento normativo chileno
+- Mejora significativa en eficiencia hospitalaria
 
 ### **5.19.2 Impacto en Hospital Herminda Martín**
 

@@ -7,7 +7,7 @@
 
 Sistema de información web para la gestión digital de partos y neonatología, diseñado para reemplazar el registro manual en Excel y cumplir con la normativa chilena vigente.
 
-## 📋 Documentación del Proyecto
+## - Documentación del Proyecto
 
 ### Informe Técnico Completo
 La documentación completa del proyecto se encuentra en:
@@ -154,11 +154,16 @@ hospital_hhm/
    
    Ver documentación detallada en: `ACTUALIZACION_MODELOS.md`
 
-6. **Crear superusuario**
+6. **Crear superusuario**:
+ Se recomienda utilizar el script de utilidades para crear el superusuario inicial:
    ```bash
-   python manage.py createsuperuser
+   python .\scripts\utilidades\create_superuser.py
    ```
 
+   En caso de error ejecuta el siguiente comando alternativo
+   ```bash
+   python -m scripts.utilidades.create_superuser
+   ```
 7. **Iniciar servidor**
    ```bash
    python manage.py runserver
