@@ -1,7 +1,35 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
 from django.db import models
 from django.core.validators import RegexValidator
 from apps.pacientes.models import validar_rut
+
+
+class UsuarioManager(DjangoUserManager):
+    """
+    Manager personalizado para el modelo Usuario.
+    Maneja la creación correcta de superusuarios.
+    """
+    
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        """
+        Crea y guarda un superusuario con los campos necesarios.
+        Asegura que is_staff y is_superuser estén en True.
+        El rol debe especificarse explícitamente al llamar este método.
+        """
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('activo', True)
+        
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+        
+        # Validar que se haya especificado un rol
+        if 'rol' not in extra_fields:
+            raise ValueError('Debe especificar un rol para el usuario.')
+        
+        return self._create_user(username, email, password, **extra_fields)
 
 
 class Usuario(AbstractUser):
@@ -76,6 +104,9 @@ class Usuario(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    # Manager personalizado
+    objects = UsuarioManager()
+    
     class Meta:
         db_table = 'usuario'
         verbose_name = 'Usuario'
@@ -108,11 +139,11 @@ class Usuario(AbstractUser):
     
     def puede_generar_reportes(self):
         """Determina si el usuario puede generar reportes"""
-        return self.rol in ['super_admin', 'jefe_servicio', 'administrativo']
+        return self.rol in ['jefe_servicio', 'administrativo']
     
     def puede_gestionar_usuarios(self):
         """Determina si el usuario puede gestionar otros usuarios"""
-        return self.rol in ['super_admin', 'jefe_servicio']
+        return self.rol in ['administrativo', 'jefe_servicio']
     
     def registrar_acceso(self):
         """Registra el último acceso del usuario y resetea intentos fallidos"""

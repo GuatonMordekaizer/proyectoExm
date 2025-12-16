@@ -74,6 +74,6 @@ def puede_gestionar_usuarios(view_func):
 def puede_ver_auditoria(view_func):
     """
     Decorador específico para vistas de auditoría.
-    Solo jefe de servicio puede ver auditoría completa.
+    Solo administrativo y jefe de servicio pueden ver auditoría completa.
     """
-    return rol_requerido('jefe_servicio')(view_func)
+    return rol_requerido('administrativo', 'jefe_servicio')(view_func)

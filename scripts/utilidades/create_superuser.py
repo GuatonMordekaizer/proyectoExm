@@ -20,8 +20,18 @@ email = 'admin@hhm.cl'
 rut = '11.111.111-1'
 
 if not Usuario.objects.filter(username=username).exists():
-    print(f"Creating superuser {username}...")
-    Usuario.objects.create_superuser(username=username, email=email, password=password, rut=rut, rol='administrativo')
-    print("Superuser created.")
+    print(f"Creating user {username} with rol 'administrativo'...")
+    usuario = Usuario.objects.create_superuser(
+        username=username, 
+        email=email, 
+        password=password, 
+        rut=rut,
+        rol='administrativo',
+        first_name='Administrador',
+        last_name='Sistema'
+    )
+    print(f"Usuario creado exitosamente:")
+    print(f"  - Rol: {usuario.rol}")
+    print(f"  - Permisos: Auditoría, Gestión de Usuarios, Reportes")
 else:
-    print("Superuser already exists.")
+    print("El usuario ya existe.")
