@@ -1,11 +1,11 @@
 Django==4.2
-psycopg2==2.9.9
+psycopg2-binary==2.9.10
 django-guardian==2.4
 django-auditlog==2.3
 django-crispy-forms==2.0
 crispy-bootstrap5==0.7
 python-decouple==3.8
-pillow==10.0
+pillow==10.4.0
 xhtml2pdf==0.2.11
 
 # Testing

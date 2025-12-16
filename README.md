@@ -8,7 +8,7 @@
 Sistema de información web para la gestión digital de partos y neonatología, diseñado para reemplazar el registro manual en Excel y cumplir con la normativa chilena vigente.
 
 ## - Documentación del Proyecto
-
+user: admin_hhm pass: admin_password_123
 ### Informe Técnico Completo
 La documentación completa del proyecto se encuentra en:
 ```

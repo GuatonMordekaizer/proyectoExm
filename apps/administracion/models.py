@@ -24,8 +24,9 @@ class Usuario(AbstractUser):
         help_text='RUT del profesional. Formato: 12.345.678-9'
     )
     
-    # Roles del sistema (7 roles según documentación)
+    # Roles del sistema (8 roles - 7 según documentación + super_admin)
     ROL_CHOICES = [
+        ('super_admin', 'Super Administrador'),
         ('matrona', 'Matrona/Matrón'),
         ('medico_obstetra', 'Médico Gineco-Obstetra'),
         ('pediatra', 'Médico Pediatra Neonatología'),

@@ -14,7 +14,7 @@ rut = '11.111.111-1'
 
 if not Usuario.objects.filter(username=username).exists():
     print(f"Creating superuser {username}...")
-    Usuario.objects.create_superuser(username=username, email=email, password=password, rut=rut, rol='jefe_servicio')
+    Usuario.objects.create_superuser(username=username, email=email, password=password, rut=rut, rol='super_admin')
     print("Superuser created.")
 else:
     print("Superuser already exists.")
