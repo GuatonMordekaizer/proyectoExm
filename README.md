@@ -25,7 +25,7 @@ docs/informe/
 ├── 07-ENFOQUE_TECNICO_4.md          # Despliegue y infraestructura
 ├── 08-CRONOGRAMA.md                 # Cronograma y planificación
 ├── 09-RESULTADOS.md                 # Resultados obtenidos y métricas
-└── 10-REFERENCIAS.md                # Referencias bibliográficas
+
 ```
 
 ## Funcionalidades Principales
